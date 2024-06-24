@@ -1,0 +1,221 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for Lambda functions
+
+Resources:
+
+  WebSocketHandler:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: "WebSocketHandler-123"
+      Handler: "lambda_function.lambda_handler"
+      Role: "arn:aws:iam::583247773415:role/service-role/WebSocketHandler-role-y1kmo32n"
+      Runtime: "python3.10"
+      MemorySize: 128
+      Timeout: 3
+      Code:
+        S3Bucket: codewebsocket
+        S3Key: WebSocketHandler-5964d249-40de-4bac-a618-c0ffd17a6f8f.zip
+
+  # my-flask-app-dev Lambda
+  MyFlaskAppDev:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: "my-flask-app-dev-123"
+      Handler: "handler.lambda_handler"
+      Role: "arn:aws:iam::583247773415:role/my-flask-app-dev-ZappaLambdaExecutionRole"
+      Runtime: "python3.10"
+      MemorySize: 512
+      Timeout: 30
+      Code:
+        S3Bucket: zappa-gws3ak3ze
+        S3Key: my-flask-app-dev-ca6aa38f-8cc9-4615-a032-49e1eadc9433.zip
+
+  # myFunction3 Lambda
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: 'LambdaExecutionRoleForECR'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'lambda.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: 'LambdaECRPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'ecr:GetDownloadUrlForLayer'
+                  - 'ecr:BatchGetImage'
+                  - 'ecr:BatchCheckLayerAvailability'
+                Resource: 'arn:aws:ecr:eu-north-1:583247773415:repository/myapp_image_repo'
+
+  MyFunction3:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: 'myFunction3-123'
+      Role: !GetAtt [LambdaExecutionRole, Arn]
+      MemorySize: 3008
+      Timeout: 240
+      PackageType: Image
+      Code:
+        ImageUri: '583247773415.dkr.ecr.eu-north-1.amazonaws.com/myapp_image_repo:latest'
+      Environment:
+        Variables:
+          APP_ID: "alex_ac596d_e43aae"
+          OPENAI_API_KEY: "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"
+          APP_KEY: "83c0f4255d169354ea28ba691cffda63067b8901a0f0eb6fb9c518f219491f52"
+
+
+  LambdaInvokePermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: 
+        Ref: 'MyFunction3'
+      Principal: 's3.amazonaws.com'
+      SourceAccount:
+        Ref: 'AWS::AccountId'
+      SourceArn: 
+        Fn::Sub: 'arn:aws:s3:::${BucketLambdaFunc}/*'
+
+
+  BucketLambdaFuncNotification:
+    Type: 'Custom::S3BucketNotificationConfiguration'
+    Properties:
+      ServiceToken: arn:aws:lambda:YOUR_REGION:YOUR_ACCOUNT_ID:function:FunctionName
+      Bucket:
+        Ref: 'BucketLambdaFunc'
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Function:
+              Fn::GetAtt: 
+                - 'MyFunction3'
+                - 'Arn'
+
+
+  IntermediaryResultsTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: "intermediary_results-123"
+      AttributeDefinitions:
+        - AttributeName: "PK"
+          AttributeType: "S"
+        - AttributeName: "SK"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "PK"
+          KeyType: "HASH"
+        - AttributeName: "SK"
+          KeyType: "RANGE"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      SSESpecification:
+        SSEEnabled: false
+
+  WebSocketConnectionsTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: "WebSocketConnections-123"
+      AttributeDefinitions:
+        - AttributeName: "client_id"
+          AttributeType: "S"
+        - AttributeName: "connectionId"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "client_id"
+          KeyType: "HASH"
+        - AttributeName: "connectionId"
+          KeyType: "RANGE"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      GlobalSecondaryIndexes:
+        - IndexName: "connectionId-index"
+          KeySchema:
+            - AttributeName: "connectionId"
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "ALL"
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+      SSESpecification:
+        SSEEnabled: false
+
+  MyFlaskAppDevApi:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: "my-flask-app-dev-123"
+      Description: "Created automatically by Zappa."
+      FailOnWarnings: "true"
+      BinaryMediaTypes:
+        - "*/*"
+      MinimumCompressionSize: 0
+      ApiKeySourceType: "HEADER"
+      EndpointConfiguration:
+        Types:
+          - "EDGE"
+      Tags:
+      - Key: "ZappaProject"
+        Value: "my-flask-app-dev"
+
+  BucketForProcessedImg:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: "bucketforprocessedimg-123"
+      # Additional configurations can be added here if needed
+
+  BucketLambdaFunc:
+    Type: 'AWS::S3::Bucket'
+    DependsOn:
+    - MyFunction3
+    Properties:
+      BucketName: "bucketlambdafunc-123"
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Fn::GetAtt: 
+              - 'MyFunction3'
+              - 'Arn'
+
+  ZappaGws3ak3ze:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: "zappa-gws3ak3ze-123"
+      # Additional configurations can be added here if needed
+
+        
+Outputs:
+
+  BucketForProcessedImgArn:
+    Value: !GetAtt BucketForProcessedImg.Arn
+    Description: ARN of the bucketforprocessedimg S3 bucket
+
+  BucketLambdaFuncArn:
+    Value: !GetAtt BucketLambdaFunc.Arn
+    Description: ARN of the bucketlambdafunc S3 bucket
+
+  ZappaGws3ak3zeArn:
+    Value: !GetAtt ZappaGws3ak3ze.Arn
+    Description: ARN of the zappa-gws3ak3ze S3 bucket
+
+  WebSocketHandlerArn:
+    Value: !GetAtt WebSocketHandler.Arn
+    Description: WebSocketHandler Lambda ARN
+
+  MyFlaskAppDevArn:
+    Value: !GetAtt MyFlaskAppDev.Arn
+    Description: my-flask-app-dev Lambda ARN
+
+  MyFunction3Arn:
+    Value: !GetAtt MyFunction3.Arn
+    Description: myFunction3 Lambda ARN

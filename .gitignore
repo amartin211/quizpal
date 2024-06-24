@@ -1,0 +1,7 @@
+*.jpg
+*.jpeg
+*.pycache
+*.pt
+*.jpg
+/myenv
+*.png
