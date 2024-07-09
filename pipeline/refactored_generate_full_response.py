@@ -7,15 +7,13 @@ import os
 from pathlib import Path
 
 
-from vision.image_preprocessing_V2 import (
+from vision.image_preprocessing import (
     preprocessing_raw_image_double_detect,
 )
 
-from vision.openai_OCR import openai_ocr, process_ocr_content
+from vision.openai_OCR import openai_ocr
 
 from utils import (
-    check_folder_empty,
-    create_folder,
     empty_folder,
     similarityscore,
     create_tuple_from_string,
@@ -41,7 +39,6 @@ from prompts_template.prompt_engineering_refined import (
 )
 
 import boto3
-from botocore.exceptions import ClientError
 from datetime import datetime
 
 
