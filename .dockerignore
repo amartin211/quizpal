@@ -1,4 +1,9 @@
 envsp/
 image_folder/
 app_local.py
-main_without_api.py
+cloudformation/
+cropped_exam_photos/
+cropped_exam_photos (copy)/
+datafolder/
+dataset/
+s3/images/
