@@ -1,0 +1,9 @@
+# dataset.yaml
+path: /home/aime/python-environments/exam_script_deploy/dataset/ # Root directory path where the train/val/test folders reside
+train: train/images  # Relative to 'path', directory with training images
+val: val/images      # Relative to 'path', directory with validation images
+test: test/images    # Relative to 'path', directory with test images (optional)
+
+# Number of classes
+nc: 1  # Update this to the number of classes in your dataset
+names: ["screen"]  # List all class names as they appear in classes.txt

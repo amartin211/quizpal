@@ -1,7 +1,5 @@
-
 ############################################################################## EXERCICE EXAMPLE ###################################################################################
 ############################################################################## EXERCICE EXAMPLE ###################################################################################
-
 
 
 data_sufficiency_examples = """\
@@ -387,7 +385,6 @@ The correct answer is therefore C.
 """
 
 
-
 critical_reasoning_example = """
 
 ANSWER KEY
@@ -515,6 +512,175 @@ The correct answer is therefore C.
 
 ############################################################################## STRUCTURING EXAMPLE ###################################################################################
 ############################################################################## STRUCTURING EXAMPLE ###################################################################################
+
+text_completness_examples = """
+
+- Input 1:
+    Practice Exam 1
+    Verbal Reasoning % Whiteboard
+    For the farmer who takes care to keep them cool, providing them with high-energy feed, and milking them regularly, Holstein cows are producing an average of 2,275 gallons of milk each per year.
+    O providing them with high-energy feed, and milking them regularly, Holstein cows are producing
+    O providing them with high-energy feed, and milked regularly, the Holstein cow produces
+    O provided with high-energy feed, and milking them regularly, Holstein cows are producing
+    O provided with high-energy feed, and milked regularly, the Holstein cow produces
+    O provided with high-energy feed, and milked regularly, Holstein cows will produce
+    @ Help @ Save for Later I1 Pause Exam I Expand Q O Time Remaining: 00:29:29 
+    0 Flag for Review
+    I ~36 
+- Output 1:
+    true
+- Input 2:    
+    Practice Exam 1
+    Verbal Reasoning
+    Whiteboard
+    Colonial historian David Allen's intensive study of five
+    communities in seventeenth-century Massachusetts is a
+    model of meticulous scholarship on the detailed microcosmic
+    level, and is convincing up to a point. Allen suggests that
+    much more coherence and direct continuity existed between
+    English and colonial agricultural practices and administrative
+    organization than other historians have suggested. However,
+    he overstates his case when the declaration that he has proved
+    "the remarkable extent to which diversity in New England
+    local institutions was directly imitative of regional differences
+    in the mother country."
+    Such an assertion ignores critical differences between
+    seventeenth-century England and New England. First,
+    England was over crowded and land-hungry; New England was
+    sparsely populated and labor-hungry. Second, England
+    suffered the normal European rate of mortality; New England,
+    especially in its first generation of English colonists, was
+    virtually free from infectious diseases. Third, England had an
+    all-embracing state church while in New England membership
+    church was restricted to the elect. Fourth, a high proportion of
+    English villagers lived under paternalistic squirearchies; no
+    such class existed in New England. By narrowing his focus to
+    village institutions and ignoring these critical differences,
+    which studies by Greven, Demos, and Lockridge have shown
+    to be so important, Allen has created a somewhat distorted
+    picture of reality.
+    Allen's work is a rather extreme example of the "country
+    community" school of seventeenth-century English history
+    whose intemperate excesses in removing all internal issues
+    from the history of that period have been exposed by
+    Professor Clive Holmes. What conclusion can be drawn, for
+    example, from Allen's discovery that Puritan clergy who had
+
+    It can be inferred that the author of the passage considers
+    Allen's research on seventeenth-century Massachusetts
+    colonies to be
+    A inconsequential but interesting
+    O largely derivative
+    O detailed but problematic
+    O highly commendable
+    O overly theoretical
+    Help O Save for Later Pause Exam Expand Next
+- Output 2:
+    false
+- Input 3:
+    Practice Exam 1
+    Verbal Reasoning
+    Whiteboard
+    In countries where automobile insurance includes compensation for whiplash injuries sustained in automobile accidents, reports of having suffered such injuries are twice as frequent as they are in countries where whiplash is not covered. Some commentators have argued, correctly, that since there is presently no objective test for whiplash, spurious reports of whiplash injuries cannot be readily identified. These commentators are, however, wrong to draw the further conclusion that in the countries with the higher rates of reported whiplash injuries, half of the reported cases are spurious: clearly, in countries where automobile insurance does not include compensation for whiplash, people often have little incentive to report whiplash injuries that they actually have suffered.
+
+    In the argument given, the two boldfaced portions play which of the following roles?
+    o The first is evidence that has been used to support a conclusion that the argument criticizes; the second is that conclusion.
+    o The first is evidence that has been used to support a conclusion that the argument criticizes; the second is the position that the argument defends.
+    o The first is a claim that has been used to support a conclusion that the argument accepts; the second is the position that the argument defends.
+    o The first is an intermediate conclusion that has been used to support a conclusion that the argument defends; the second is the position that the argument opposes.
+    o The first presents a claim that is disputed in the argument; the second is a conclusion that has been drawn on the basis of that claim.
+    Help Save for Later Pause Exam Expand Next
+- Output 3:
+    true
+- Input 4:
+    Practice Exam 1
+    Quantitative Reasoning
+    A certain library assesses fines for overdue books as follows. On the first day that a book is overdue, the total fine is $0.10. For each additional day that the book is overdue, the total fine is either increased by $0.30 or doubled, whichever results in the lesser amount. What is the total fine for a book on the fourth day it is overdue?
+
+    ○ $0.60
+    ○ $0.70
+    ○ $0.80
+    ○ $0.90
+    ○ $1.00
+- Output 4:
+    true
+- Input 5:
+    Flag for Review
+
+    For the farmer who takes care to keep them cool, providing them with high-energy feed, and milking them regularly, Holstein cows are producing an average of 2,275 gallons of milk each per year.
+        O  providing them with high-energy feed, and milking them regularly, Holstein cows are producing 
+        O  providing them with high-energy feed, and milked regularly, the Holstein cow produces
+        O  provided with high-energy feed, and milking them regularly, Holstein cows are producing
+        O  provided with high-energy feed, and milked regularly, the Holstein cow produces
+        O  provided with high-energy feed, and milked regularly, Holstein cows will produce
+
+    Help Save for Later Pause Exam Expand   Next
+- Output 5:
+    true
+- Input 6:
+    Practice Exam 1
+    Verbal Reasoning
+    Whiteboard
+    Many people believe that because wages are lower in developing
+    countries than in developed countries, competition from developing
+    countries in goods traded internationally will soon eliminate large
+    numbers of jobs in developed countries. Clearly, one remedy is developed
+    countries' advanced technologies result in higher productivity, 
+    which accounts for their higher wages. Advanced technology is 
+    being transferred more speedily across borders than ever before, with
+    the latest technology, productivity and wages in developing 
+    countries will remain lower than in developed countries for many
+    years because developed countries have substantial head starts.
+
+
+    better-educated workers. What is true is that wages for similar
+    sometimes exactly similar, jobs in developing countries have varied
+    rise. Some individuals firms in developing countries have raised
+    similar productivity but with lower wages (which accounts for the lowe
+    developing country's economy as a whole, productivity is
+    all segments in goods Traded internationally. In response to cause, in 
+    improvements costs. Furthermore, anything that helps to raise the
+    wages in the developing country will cause an equivalent increase in 
+    the developed countries' point of view is the equivalent of increased
+    prices the country's currency, or at the very least, however, that 
+    wages in the developing country but although this is a path forward, that
+    is now much harder to step in a world where capital moves more freely.
+
+
+    The primary purpose of the passage is to
+    Identify the origin of a common misconception
+    discuss the implications of a generally accepted principle
+    present information relevant in evaluating a commonly
+    held  belief
+    defend a controversial assertion against a variety of
+    counterarguments
+
+    Explain under what circumstances a well-known
+    phenomenon occurs
+    Next
+    Help Save for Later Pause Exam Expand
+- Output 6:
+    true
+- Input 7:
+    Practice Exam 1
+    Verbal Reasoning
+    Whiteboard
+    funding to minority businesses. At first this funding was directed toward minority entrepreneurs with very low incomes. A 1967 amendment to the Economic Opportunity Act directed the SBA to pay special attention to minority-owned businesses located in urban or rural areas characterized by high proportions of unemployed or low-income individuals. Since then, the answer given to the fundamental question of who the recipients should be—the most economically disadvantaged or those with the best prospects for business success—has changed, and the social goals of the programs have shifted, resulting in policy changes.
+
+    The first shift occurred during the early 1970’s. While the goal of assisting the economically disadvantaged entrepreneur remained, a new goal emerged: to remedy the effects of past discrimination. In fact, in 1970 the SBA explicitly stated that their main goal was to increase the number of minority-owned businesses. At the time, minorities constituted seventeen percent of the nation’s population, but only four percent of the nation’s self-employed. This ownership gap was held to be the result of past discrimination. Increasing the number of minority-owned firms was seen as a way to remedy this problem. In that context, providing funding to minority entrepreneurs in middle- and high-income brackets seemed justified.
+
+    In the late 1970’s, the goals of minority-business funding programs shifted again. At the Minority Business Development Agency, for example, the goal of increasing the numbers of minority-owned firms was supplanted by the goal of creating and assisting more minority-owned substantive firms with future growth potential. Assisting manufacturers or wholesalers became far more important than assisting small service businesses. Minority-business funding programs were now justified as instruments for economic development, particularly for creating jobs in minority communities of high unemployment.
+
+    The passage mentions which of the following as a basic consideration in administering minority-business funding programs?
+    O Coming up with funding for the programs
+    O Encouraging government agencies to assist middle- and high-income minority entrepreneurs
+    O Recognizing the profit potential of small service businesses in urban communities
+    O Determining who should be the recipients of the funding
+    O Determining which entrepreneurs are likely to succeed
+- Output 7:
+    false
+    """
+
 
 cleaning_text_examples = """
 - Example 1:
@@ -699,5 +865,113 @@ the annual number caught for human consumption has not increased.
 fish that is highly valued as food by Parlanders, who had hoped that the decline in the alligator population would lead to an increase in the numbers of these fish available 
 for human consumption. Yet the population of this fish species has also declined, even though the annual number caught for human consumption has not increased.
 Finally, you will output the final text by putting.### 
+
+"""
+
+cleaning_ocr_response = """
+- Input 1 : 
+Practice Exam 2
+Verbal Reasoning Whiteboard
+
+Section 301 of the 1988 Omnibus Trade and Competitiveness Act enables the United States Trade Representative 
+to single out a country as an unfair trader, begin trade negotiations with that country, and, 
+if the negotiations do not conclude if the United States government\’s being satisfied, to impose sanctions.
+
+O by the United States government\’s being satisfied, to impose
+O by the United States government\’s satisfaction, impose
+O with the United States government\’s being satisfied, imposing
+O to the United States government\’s satisfaction, impose
+O to the United States government\’s satisfaction, imposing
+
+Help Next Save for Later Pause Exam Expand
+
+- Output 1 :
+{"text": 
+"Section 301 of the 1988 Omnibus Trade and Competitiveness Act enables the United States Trade Representative 
+to single out a country as an unfair trader, begin trade negotiations with that country, and, 
+if the negotiations do not conclude if the United States government\’s being satisfied, to impose sanctions.",
+"question_and_answer_choices": 
+"O by the United States government\’s being satisfied, to impose
+O by the United States government\’s satisfaction, impose
+O with the United States government\’s being satisfied, imposing
+O to the United States government\’s satisfaction, impose
+O to the United States government\’s satisfaction, imposing",
+"is_text_complete": True,
+"status": "success"}
+
+
+- Input 2 : 
+Practice Exam 1
+Quantitative Reasoning
+Whiteboard
+Which of the following is an integer?
+I. 13!
+         6!
+II. 12!
+        4!3!
+III. 12!
+         7!5!
+O I only
+O II only
+O III only
+O I and II only
+O I, II, and III
+
+- Output 2 :
+{"text": 
+"Practice Exam 1\nQuantitative Reasoning\nWhiteboard\nWhich of the following is an integer?\n
+I. 13! / 6!\nII. 12! / 4!3!\nIII. 12! / 7!5!\nO I only\nO II only\nO III only\nO I and II only\nO I, II, and III", 
+"question_and_answer_choices": 
+"Which of the following is an integer? I. 13! / 6!', 'II. 12! / 4!3!', 'III. 12! / 7!5!', 'O I only', 'O II only', 'O III only', 'O I and II only', 'O I, II, and III"
+"is_text_complete": True, 
+"status": "success"}
+
+- Output 3 :
+aiime@Et00-22an:~5
+
+loop6 7:16 0 32M 442 loop /snap/core20/1822
+loop7 7:16 0 55M 442 loop /snap/snapd/2071
+loop8 7:16 0 64M 442 loop /snap/desktop-Integration/83
+loop9 11:52 0 43M 0 loop /snap/core20/41B2
+nvme0n1 0 0 922G 0 disk
+nvme0n1p1 0 0 146M 0. part nvme0n1p2 0 0 923G 0 part /mnt/nd0 
+nvme0n1p5 259 :2 0 1M 0 part
+nvme0n1p1 259 :1 0 512M 0 part /boot/efi 
+luvmeon8 259 :6 0 37G 0 osa/ur/mnapfirefoxcommonfiost-hunspell 
+aiime@Et00-22a5 : ~5 sudo dd if=/sourcesd_card.img of=/dev/sdb bs=s4K statusorogress
+dd: failed to open 'A:/atme/source_sd_card.ing':No such file or directory
+iame@Et00-22an:~ 5 aw olurce_sd_catd_backuping of=i/de/sdb bs=sk staia-pr 12582912 bytes (13 GB. 2 B copied. 15.1 20 1.02.29.
+234/12+1 records out
+2347770744 bytes (31 GB, 29 Gl copied, 1192. 34 5,228
+
+IMG_1657 Attachmentattacnment tachment2023010/1
+Q2.JP9 Q...troO L03619803Output
+Attachment 5)2.17 jpg 1MAE 179c  IM9_1732tne
+Png templateE109JQM241j09.ternplate0.DMProsde202
+
+
+2023030111 20232104 Imagen_2 (IMG_1792
+06506.JP9 0241 jpeg
+  0468. JPQ
+
+fin
+JPEG
+IMG_1742
+
+Output 4 :
+{
+  "text": "aiime@Et00-22an:~5\n\nloop6 7:16 0 32M 442 loop /snap/core20/1822\nloop7 7:16 0 55M 442 loop /snap/snapd/2071\n
+  loop8 7:16 0 64M 442 loop /snap/desktop-Integration/83\nloop9 11:52 0 43M 0 loop /snap/core20/41B2\n
+  nvme0n1 0 0 922G 0 disk\nnvme0n1p1 0 0 146M 0. part nvme0n1p2 0 0 923G 0 part /mnt/nd0\n
+  nvme0n1p5 259 :2 0 1M 0 part\nnvme0n1p1 259 :1 0 512M 0 part /boot/efi\n
+  luvmeon8 259 :6 0 37G 0 osa/ur/mnapfirefoxcommonfiost-hunspell\naiime@Et00-22a5 : ~5 sudo dd if=/sourcesd_card.img of=/dev/sdb bs=s4K statusorogress\n
+  dd: failed to open 'A:/atme/source_sd_card.ing':No such file or directory\niame@Et00-22an:~ 5 aw olurce_sd_catd_backuping of=i/de/sdb bs=sk staia-pr 12582912 bytes (13 GB. 2 B copied. 15.1 20 1.02.29.\n
+  234/12+1 records out\n2347770744 bytes (31 GB, 29 Gl copied, 1192. 34 5,228\n\nIMG_1657 Attachmentattacnment tachment2023010/1 Q2.JP9 Q...troO L03619803Output\n
+  Attachment 5)2.17 jpg 1MAE 179c  IM9_1732tne\nPng templateE109JQM241j09.ternplate0.DMProsde202\n\n
+  2023030111 20232104 Imagen_2 (IMG_1792\n06506.JP9 0241 jpeg\n  0468. JPQ\n\nfin\nJPEG\nIMG_1742\nea",
+  "question_and_answer_choices": [],
+  "is_text_complete": true,
+  "status": "failed"
+}
 
 """

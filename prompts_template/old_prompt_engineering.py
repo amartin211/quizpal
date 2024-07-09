@@ -1,4 +1,6 @@
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 from prompts_template.exam_instructions_template import (
     verbal_questions_direction,
     quantitative_questions_direction,
@@ -21,12 +23,10 @@ def answer_question_v2(prompt, model="gpt-4"):
         {"role": "user", "content": prompt},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model,
+    messages=messages,
+    temperature=0)
+    return response.choices[0].message.content
 
 
 def answer_question_v3(prompt, model="gpt-4"):
@@ -81,12 +81,10 @@ def answer_question_v3(prompt, model="gpt-4"):
         {"role": "user", "content": prompt},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model,
+    messages=messages,
+    temperature=0)
+    return response.choices[0].message.content
 
 
 def get_completion(prompt, model="gpt-4"):
@@ -110,12 +108,10 @@ def get_completion(prompt, model="gpt-4"):
         {"role": "user", "content": prompt},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model,
+    messages=messages,
+    temperature=0)
+    return response.choices[0].message.content
 
 
 def get_structured_questions(prompt, model="gpt-4"):
@@ -132,12 +128,10 @@ def get_structured_questions(prompt, model="gpt-4"):
         {"role": "user", "content": prompt},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model,
+    messages=messages,
+    temperature=0)
+    return response.choices[0].message.content
 
 
 prompt_verbal = "question type :  verbal\

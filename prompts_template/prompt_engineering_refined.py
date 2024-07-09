@@ -7,8 +7,12 @@ from prompts_template.exercice_samples_prompts import (
     cleaning_text_examples,
     cleaning_response_example,
     combining_text_example,
+    text_completness_examples,
 )
-import openai
+from openai import OpenAI
+import re
+
+client = OpenAI()
 
 
 #############################################################################################################################################################
@@ -55,12 +59,8 @@ def get_completion(prompt, model="gpt-4"):
         {"role": "user", "content": cleaning_text_examples + prompt_to_add},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0, seed=42)
+    return response.choices[0].message.content
 
 
 def merge_two_texts_into_one(prompt, model="gpt-3.5-turbo"):
@@ -76,15 +76,11 @@ def merge_two_texts_into_one(prompt, model="gpt-3.5-turbo"):
             "content": "You are a world leading expert at GMAT exam.\
                 Given a piece of text that contain two passages separated by /// your task is to combined the two texts by removing the duplicated texts and output a clean text surounded by ###",
         },
-        {"role": "user", "content": combining_text_example + prompt},
+        {"role": "user", "content": combining_text_example + prompt_to_add},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0)
+    return response.choices[0].message.content
 
 
 def structure_response(prompt, model="gpt-3.5-turbo"):
@@ -102,12 +98,8 @@ def structure_response(prompt, model="gpt-3.5-turbo"):
         {"role": "user", "content": cleaning_response_example + prompt_to_add},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0)
+    return response.choices[0].message.content
 
 
 def text_cleaner(prompt, model="gpt-3.5-turbo"):
@@ -117,17 +109,13 @@ def text_cleaner(prompt, model="gpt-3.5-turbo"):
             "content": "You are a renowned expert in GMAT exam formatting.\n\
             When presented with a text passage, your primary responsibility is to cleanse it.\n\
             This involves detecting and eliminating any unrelated characters or elements, especially at the beginning or end of the passage.\n\
-            The output should be the purified text, free from these extraneous details.",
+            The output should be the purified text, free from these extraneous details. You will not change any text within the passage itself.",
         },
         {"role": "user", "content": prompt},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0)
+    return response.choices[0].message.content
 
 
 def question_cleaner(prompt, model="gpt-3.5-turbo"):
@@ -158,12 +146,100 @@ def question_cleaner(prompt, model="gpt-3.5-turbo"):
         {"role": "user", "content": prompt},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0)
+    return response.choices[0].message.content
+
+
+def get_ocr_status(prompt, model="gpt-3.5-turbo"):
+    messages = [
+        {
+            "role": "system",
+            "content": "Given the raw result of an OCR, your task is to defined whether the extracted text is consistent with a question answering / multiple choices answers / exam question or a text passage.\
+                        If this is the case you output 'true' if not 'false. You only output 'true' or 'false', nothing more.",
+        },
+        {"role": "user", "content": prompt},
+    ]
+
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0)
+    return response.choices[0].message.content
+
+
+# Consider the passage complete if it forms a coherent whole with no such issues, even if short. \
+def check_text_completness(prompt, model="gpt-3.5-turbo"):
+
+    prompt_to_add = f""" 
+    - Input 8:\n\
+        {prompt.strip()} \n\
+    - Output 8: """
+
+    messages = [
+        {
+            "role": "system",
+            "content": " Analyze the given passage, which is a result of an OCR process, to determine if it's complete. Follow these steps:\
+            1. Identify the main body of text, ignoring any questions or answer choices that may follow.\
+            2. For the main body of text, evaluate the following:\
+                a) Does it start with a complete sentence?\
+                b) Does it end with a complete sentence?\
+                c) Are there any sentences that end abruptly or mid-thought?\
+            3. Output ONLY 'false' if any of the following are true:\
+                - The text ends mid-sentence\
+                - The last paragraph is clearly incomplete\
+                - There are obvious abrupt cuts in the content\
+            4. Output 'true' ONLY if none of the conditions in step 3 are met.\
+            5. Disregard any questions or answer choices that may follow the main text when making your determination.\
+            Provide no explanation, just output the boolean result as a string.",
+        },
+        {"role": "user", "content": text_completness_examples + prompt_to_add},
+    ]
+
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0, seed=42)
+    return response.choices[0].message.content
+
+
+def verbal_or_quantitive(prompt, model="gpt-3.5-turbo"):
+    messages = [
+        {
+            "role": "system",
+            "content": "Given the raw result of an OCR, your task is to defined whether the extracted text is related to a \
+            verbal or a quantitive question. It is a verbal question with a lot of text you output 'verbal' \
+            if it is a quantitive question you output 'quantitive'.",
+        },
+        {"role": "user", "content": prompt.strip()},
+    ]
+
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0, seed=42)
+    return response.choices[0].message.content
+
+
+def extract_incomplete_text(prompt, model="gpt-3.5-turbo"):
+    messages = [
+        {
+            "role": "system",
+            "content": "Given the raw result of an OCR which contains text related to a question answering/multiple choice answers problem, \
+                your task is to separate the text/passage from the question and answer choices and output this text.\
+                The text passage should have a missing part and you only output this raw text/passage without the \
+                related question and answer choices.",
+        },
+        {"role": "user", "content": prompt},
+    ]
+
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0, seed=42)
+    return response.choices[0].message.content
+
+
+def extract_question(prompt, model="gpt-3.5-turbo"):
+    messages = [
+        {
+            "role": "system",
+            "content": "Given the raw result of an OCR which contains text related to a question answering/multiple choice answers problem, \
+                your task is to separate the question and related answer choices from the text/passage.\
+                You only output question and answer choices without the related text/passage.",
+        },
+        {"role": "user", "content": prompt},
+    ]
+
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0, seed=42)
+    return response.choices[0].message.content
 
 
 #############################################################################################################################################################
@@ -186,12 +262,8 @@ def answer_ps_question(prompt, model="gpt-4"):
         {"role": "user", "content": problem_solving_examples + prompt_to_add},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0)
+    return response.choices[0].message.content
 
 
 def answer_ds_question(prompt, model="gpt-4"):
@@ -209,12 +281,8 @@ def answer_ds_question(prompt, model="gpt-4"):
         {"role": "user", "content": data_sufficiency_examples + prompt_to_add},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0)
+    return response.choices[0].message.content
 
 
 def answer_rc_question(prompt, model="gpt-4"):
@@ -232,12 +300,8 @@ def answer_rc_question(prompt, model="gpt-4"):
         {"role": "user", "content": reading_comprehension_sample + prompt_to_add},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0)
+    return response.choices[0].message.content
 
 
 def answer_cr_question(prompt, model="gpt-4"):
@@ -255,12 +319,8 @@ def answer_cr_question(prompt, model="gpt-4"):
         {"role": "user", "content": critical_reasoning_example + prompt_to_add},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0)
+    return response.choices[0].message.content
 
 
 def answer_sc_question(prompt, model="gpt-4"):
@@ -278,9 +338,5 @@ def answer_sc_question(prompt, model="gpt-4"):
         {"role": "user", "content": sentence_correction_example + prompt_to_add},
     ]
 
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        temperature=0,
-    )
-    return response.choices[0].message["content"]
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0)
+    return response.choices[0].message.content

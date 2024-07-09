@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 import os
 from werkzeug.utils import secure_filename
-from generate_full_response import get_response_from_raw_image
+from pipeline.generate_full_response import get_response_from_raw_image
 from flask import send_from_directory
 
 from flask import Flask, request, render_template_string
