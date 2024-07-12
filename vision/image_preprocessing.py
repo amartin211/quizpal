@@ -3,6 +3,8 @@ import numpy as np
 import cv2
 from ultralytics import YOLO
 import logging
+import uuid
+import os
 
 
 # Basic configuration of logging
@@ -36,7 +38,7 @@ def crop_and_save_image_with_bbox(input_file_path, output_file_path, box):
 
 def detect_screen_using_custom_yolo(source, output_path):
 
-    model = YOLO("best.pt")  # load a pretrained model
+    model = YOLO("yolo_screen_detector.pt")  # load a pretrained model
 
     # Set the confidence threshold
     conf_thresh = 0.6
@@ -145,11 +147,15 @@ def improved_rotate_image_using_lines_two(img_path):
 def preprocessing_raw_image_double_detect(path_raw_img, processed_path):
 
     try:
-        yolo_path = "yolo_cropped.jpeg"
+
+        unique_filename = str(uuid.uuid4()) + ".jpeg"
+        yolo_path = "/tmp/" + unique_filename
 
         detect_tv_laptop(path_raw_img, yolo_path)
         detect_screen_using_custom_yolo(yolo_path, yolo_path)
         cropped_img = improved_rotate_image_using_lines(yolo_path)
+
+        os.remove(yolo_path)
 
     except Exception as e:
         raise ValueError("No screen has been detected on this image") from e

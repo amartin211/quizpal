@@ -1,9 +1,11 @@
 envsp/
+myenv/
 image_folder/
 app_local.py
 cloudformation/
 cropped_exam_photos/
 cropped_exam_photos (copy)/
+raw_images (copy)/
 datafolder/
 dataset/
 s3/images/

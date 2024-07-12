@@ -9,12 +9,7 @@ from vision.image_preprocessing import (
 
 from vision.openai_OCR import openai_ocr
 
-from utils import (
-    empty_folder,
-    similarityscore,
-    create_tuple_from_string,
-    put_image_to_s3,
-)
+from utils import empty_folder, similarityscore, create_tuple_from_string, put_image_to_s3, check_if_text_complete
 
 from prompts_template.prompt_engineering_refined import (
     get_completion,
@@ -23,8 +18,7 @@ from prompts_template.prompt_engineering_refined import (
     question_cleaner,
     get_ocr_status,
     verbal_or_quantitive,
-    check_text_completness,
-    extract_incomplete_text,
+    extract_main_text,
     extract_question,
     structure_response,
     answer_ps_question,
@@ -131,12 +125,13 @@ def get_response_from_raw_image(file_path):
     verbal_or_quant = verbal_or_quantitive(raw_ocr_result)  # API CALL 3
 
     if verbal_or_quant == "verbal":
-        is_text_complete = check_text_completness(raw_ocr_result)  # API CALL 4
+        main_text_extracted = extract_main_text(raw_ocr_result)  # API CALL 4
+        is_text_complete = check_if_text_complete(main_text_extracted)
         print(is_text_complete)
     else:
-        is_text_complete = "true"
+        is_text_complete = True
 
-    if is_text_complete == "true":
+    if is_text_complete:
         print("TEXT IS COMPLETE")
 
         output = get_completion(raw_ocr_result)  # API CALL 5
@@ -168,23 +163,31 @@ def get_response_from_raw_image(file_path):
 
     else:
         # TEXT IS NOT COMPLETE
-        incomplete_text = extract_incomplete_text(raw_ocr_result)  # API CALL 4
+
+        # IF A PREVIOUS TEXT WAS RETRIEVE BUT INCOMPLETE WE NEED TO REMOVE THE TEXT FROM THE FOLDER
+        if os.listdir(path_to_previous_text):
+            text_full = open(f"{path_to_previous_text}/prior_full_passage.txt", "r").read()
+            is_text_complete = check_if_text_complete(text_full)  # CHECK IF THE TEXT IS COMPLETE
+            if not is_text_complete:
+                empty_folder(path_to_previous_text)
+
+        # incomplete_text = extract_incomplete_text(raw_ocr_result)  # API CALL 4
         question = extract_question(raw_ocr_result)  # API CALL 5
 
         # CHECK IF A MISSING TEXT HAS ALREADY BEEN RETRIEVED
         if os.listdir(path_to_missing_text):
             initial_text = open(f"{path_to_missing_text}/missing_passage.txt", "r").read()
-            score = similarityscore(initial_text, incomplete_text)
+            score = similarityscore(initial_text, main_text_extracted)
             print(score)
 
             if score > 0.99:
 
                 print("a missing text already exist, we'll complete this text and save it")
-                complete_text = f"{initial_text}+///+{incomplete_text}"
+                complete_text = f"{initial_text}+///+{main_text_extracted}"
                 clean_text = merge_two_texts_into_one(complete_text)  # API CALL 6
 
                 with open(f"{path_to_previous_text}/prior_full_passage.txt", "w") as f:
-                    f.write(clean_text)
+                    f.write(clean_text)  # PRIOR FULL PASSAGE WILL BE OVERWRITTEN BY THE NEW CLEAN TEXT
 
                 # EMPTY THE MISSING TEXT FOLDER SINCE WE HAVE THE COMPLETE TEXT SAVED IN path_to_previous_text
                 empty_folder(path_to_missing_text)
@@ -206,7 +209,7 @@ def get_response_from_raw_image(file_path):
         # CHECK IF A FULL TEXT HAS ALREADY BEEN RETRIEVED
         if os.listdir(path_to_previous_text):
             text_full = open(f"{path_to_previous_text}/prior_full_passage.txt", "r").read()
-            score = similarityscore(text_full, incomplete_text)
+            score = similarityscore(text_full, main_text_extracted)
             print(score)
 
             if score > 0.99:
@@ -231,11 +234,11 @@ def get_response_from_raw_image(file_path):
             else:
                 # THE PARTIAL TEXT PROVIDED IS NOT RELATED TO THE LAST PRIOR FULL TEXT (MEANING IT IS A NEW TEXT)
                 print("some text are missing, we are saving this part")
-                clean_text = text_cleaner(incomplete_text)  # API CALL 6
+                clean_text = text_cleaner(main_text_extracted)  # API CALL 6
                 with open(os.path.join(path_to_missing_text, "missing_passage.txt"), "w") as f:
                     f.write(clean_text)
 
-                empty_folder(path_to_previous_text)  # EMPTY THE FULL TEXT FOLDER
+                empty_folder(path_to_previous_text)  # EMPTY THE FULL TEXT FOLDER SINCE WE HAVE A NEW TEXT
                 response = "waiting for the next image to complete the text"
 
                 results["status"] = "success"
@@ -246,9 +249,9 @@ def get_response_from_raw_image(file_path):
                 return results
 
         else:
-            # THE TEXT IS NEW, THERE IS NOT PARTIAL TEXT NOR EXISTING FULL TEXT
+            # THE TEXT IS NEW, THERE IS NOT PARTIAL TEXT NOR EXISTING FULL TEXT RELATED TO THE NEW TEXT (similarity score < 0.99)
             print("some text are missing, we are saving this part")
-            clean_text = text_cleaner(incomplete_text)  # API CALL 6
+            clean_text = text_cleaner(main_text_extracted)  # API CALL 6
             with open(os.path.join(path_to_missing_text, "missing_passage.txt"), "w") as f:
                 f.write(clean_text)
             response = "waiting for the next image to complete the text"
@@ -261,5 +264,5 @@ def get_response_from_raw_image(file_path):
             return results
 
 
-file_path = "/home/aime/python-environments/exam_script_deploy/raw_images (copy)/20240112192559.jpg"
+file_path = "/home/aime/python-environments/exam_script_deploy/raw_images (copy)/20240112190852.jpg"
 print(get_response_from_raw_image(file_path))

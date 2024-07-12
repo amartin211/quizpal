@@ -10,7 +10,7 @@ from prompts_template.exercice_samples_prompts import (
     text_completness_examples,
 )
 from openai import OpenAI
-import re
+
 
 client = OpenAI()
 
@@ -190,6 +190,23 @@ def check_text_completness(prompt, model="gpt-3.5-turbo"):
             Provide no explanation, just output the boolean result as a string.",
         },
         {"role": "user", "content": text_completness_examples + prompt_to_add},
+    ]
+
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0, seed=42)
+    return response.choices[0].message.content
+
+
+def extract_main_text(ocr_result, model="gpt-3.5-turbo"):
+
+    messages = [
+        {
+            "role": "system",
+            "content": """Please extract only the main passage from the following OCR result. 
+                Exclude any metadata, question prompts, or answer choices. 
+                Your task is to separate the text/passage from the question and answer choices as well as the metadata and output this text.
+                Return only the extracted main text, without any additional commentary or introductory phrases:""",
+        },
+        {"role": "user", "content": ocr_result},
     ]
 
     response = client.chat.completions.create(model=model, messages=messages, temperature=0, seed=42)

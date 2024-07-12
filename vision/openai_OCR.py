@@ -20,6 +20,7 @@ def openai_ocr(image_url):
                             "type": "text",
                             "text": "Please do an OCR on the attached image and \
                             output the raw text extracted. NOTE: just output the raw text extracted from the image. \
+                            If the image is blurry or the text is not clear, please output None \
                             Do not include any additional information.",
                         },
                         {
