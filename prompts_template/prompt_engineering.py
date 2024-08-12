@@ -1,4 +1,9 @@
-from prompts_template.exercice_samples_prompts import (
+import os
+
+import anthropic
+from openai import OpenAI
+
+from prompts_template.exercise_samples import (
     problem_solving_examples,
     data_sufficiency_examples,
     reading_comprehension_sample,
@@ -9,9 +14,6 @@ from prompts_template.exercice_samples_prompts import (
     combining_text_example,
     text_completness_examples,
 )
-from openai import OpenAI
-import anthropic
-import os
 
 
 client = OpenAI()

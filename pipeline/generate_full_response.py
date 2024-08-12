@@ -1,13 +1,11 @@
 import os
+import logging
 from pathlib import Path
 from datetime import datetime
-import logging
+
 import boto3
-from botocore.exceptions import ClientError
 
 from vision.image_preprocessing import preprocessing_raw_image_double_detect
-from vision.openai_OCR import openai_ocr
-from vision.mathpix_ocr import ocr_mathpix
 from vision.claude_ocr import ocr_claude
 from utils import (
     empty_folder,
@@ -16,7 +14,7 @@ from utils import (
     put_image_to_s3,
     check_if_text_complete,
 )
-from prompts_template.prompt_engineering_refined import (
+from prompts_template.prompt_engineering import (
     get_completion,
     merge_two_texts_into_one,
     text_cleaner,
@@ -38,8 +36,8 @@ logger.setLevel(logging.INFO)
 
 s3_client = boto3.client("s3")
 
-BUCKET_LAMBDA = os.environ["BUCKET_LAMBDA"]
-BUCKET_PROCESSED_IMG = os.environ["BUCKET_PROCESSED_IMG"]
+BUCKET_LAMBDA = os.environ.get("BUCKET_LAMBDA", "")
+BUCKET_PROCESSED_IMG = os.environ.get("BUCKET_PROCESSED_IMG", "")
 BASE_DIR = "/tmp/"
 PROCESSED_FOLDER = "processed_folder"
 FULL_TEXT_FOLDER = "previous_full_passage"
@@ -47,13 +45,11 @@ MISSING_TEXT_FOLDER = "missing_passage_folder"
 
 
 def initialize_directories():
-    os.makedirs(BASE_DIR, exist_ok=True)
     path_to_processed = os.path.join(BASE_DIR, PROCESSED_FOLDER)
     path_to_previous_text = os.path.join(BASE_DIR, FULL_TEXT_FOLDER)
     path_to_missing_text = os.path.join(BASE_DIR, MISSING_TEXT_FOLDER)
-    os.makedirs(path_to_processed, exist_ok=True)
-    os.makedirs(path_to_previous_text, exist_ok=True)
-    os.makedirs(path_to_missing_text, exist_ok=True)
+    for path in [path_to_processed, path_to_previous_text, path_to_missing_text]:
+        os.makedirs(path, exist_ok=True)
     return path_to_processed, path_to_previous_text, path_to_missing_text
 
 
@@ -61,86 +57,85 @@ def process_image(file_path):
     path_to_processed, _, _ = initialize_directories()
     file_name = Path(file_path).name
     file_path_processed = os.path.join(path_to_processed, file_name)
-    processed_img = preprocessing_raw_image_double_detect(file_path, file_path_processed)
+    preprocessing_raw_image_double_detect(file_path, file_path_processed)
     return file_path_processed
 
 
 def upload_image_to_s3(file_path_processed, device_id, file_name):
     put_image_to_s3(file_path_processed, device_id, file_name)
-    processed_image_url = f"https://{BUCKET_PROCESSED_IMG}.s3.eu-north-1.amazonaws.com/{device_id}/{file_name}"
-    return processed_image_url
+    return f"https://{BUCKET_PROCESSED_IMG}.s3.eu-north-1.amazonaws.com/{device_id}/{file_name}"
 
 
 def process_complete_question(raw_ocr_result):
-    output = get_completion(raw_ocr_result)  # API CALL 5
+    output = get_completion(raw_ocr_result)
     question_type, clean_question = create_tuple_from_string(output)
 
-    if question_type == "critical reasoning":
-        final_response = answer_cr_question(clean_question)  # API CALL 6
-    elif question_type == "problem solving":
-        final_response = answer_ps_question_with_claude(clean_question)  # API CALL 6
-    elif question_type == "data sufficiency":
-        final_response = answer_ds_question_with_claude(clean_question)  # API CALL 6
-    elif question_type == "sentence correction":
-        final_response = answer_sc_question(clean_question)  # API CALL 6
-    elif question_type == "reading comprehension":
-        final_response = answer_rc_question(clean_question)  # API CALL 6
+    answer_handlers = {
+        "critical reasoning": answer_cr_question,
+        "problem solving": answer_ps_question_with_claude,
+        "data sufficiency": answer_ds_question_with_claude,
+        "sentence correction": answer_sc_question,
+        "reading comprehension": answer_rc_question,
+    }
 
-    answer_choice = structure_response(final_response)  # API CALL 7
+    handler = answer_handlers.get(question_type)
+    if handler is None:
+        raise ValueError(f"Unknown question type: {question_type}")
+
+    final_response = handler(clean_question)
+    answer_choice = structure_response(final_response)
     return clean_question, final_response, answer_choice
 
 
 def process_incomplete_text(main_text_extracted, question, path_to_previous_text, path_to_missing_text):
+    # Clean up incomplete prior texts
     if os.listdir(path_to_previous_text):
         text_full = open(f"{path_to_previous_text}/prior_full_passage.txt", "r").read()
-        is_text_complete = check_if_text_complete(text_full)
-        if not is_text_complete:
+        if not check_if_text_complete(text_full):
             empty_folder(path_to_previous_text)
 
+    # Check if a missing passage fragment already exists
     if os.listdir(path_to_missing_text):
         initial_text = open(f"{path_to_missing_text}/missing_passage.txt", "r").read()
-        score = similarityscore(initial_text, main_text_extracted)
-        if score > 0.99:
-            print("a missing passage already exists")
+        if similarityscore(initial_text, main_text_extracted) > 0.99:
             return merge_and_process_text(
                 initial_text, main_text_extracted, question, path_to_previous_text, path_to_missing_text
             )
 
+    # Check if a complete passage already exists
     if os.listdir(path_to_previous_text):
         text_full = open(f"{path_to_previous_text}/prior_full_passage.txt", "r").read()
-        score = similarityscore(text_full, main_text_extracted)
-        if score > 0.99:
-            print("a full passage already exists")
+        if similarityscore(text_full, main_text_extracted) > 0.99:
             return process_existing_full_text(text_full, question)
-        else:
-            return save_partial_text(main_text_extracted, path_to_missing_text, path_to_previous_text)
-    else:
-        return save_partial_text(main_text_extracted, path_to_missing_text, path_to_previous_text)
+
+    return save_partial_text(main_text_extracted, path_to_missing_text, path_to_previous_text)
 
 
 def merge_and_process_text(initial_text, main_text_extracted, question, path_to_previous_text, path_to_missing_text):
     complete_text = f"{initial_text}+///+{main_text_extracted}"
-    clean_text = merge_two_texts_into_one(complete_text)  # API CALL 6
+    clean_text = merge_two_texts_into_one(complete_text)
+
     with open(f"{path_to_previous_text}/prior_full_passage.txt", "w") as f:
         f.write(clean_text)
     empty_folder(path_to_missing_text)
-    formatted_question = question_cleaner(question)  # API CALL 7
+
+    formatted_question = question_cleaner(question)
     full_question = f"{clean_text}\n{formatted_question}"
-    final_response = answer_rc_question(full_question)  # API CALL 8
-    answer_choice = structure_response(final_response)  # API CALL 9
+    final_response = answer_rc_question(full_question)
+    answer_choice = structure_response(final_response)
     return full_question, final_response, answer_choice
 
 
 def process_existing_full_text(text_full, question):
-    formatted_question = question_cleaner(question)  # API CALL 6
+    formatted_question = question_cleaner(question)
     full_question = f"{text_full}\n{formatted_question}"
-    final_response = answer_rc_question(full_question)  # API CALL 7
-    answer_choice = structure_response(final_response)  # API CALL 8
+    final_response = answer_rc_question(full_question)
+    answer_choice = structure_response(final_response)
     return full_question, final_response, answer_choice
 
 
 def save_partial_text(main_text_extracted, path_to_missing_text, path_to_previous_text):
-    clean_text = text_cleaner(main_text_extracted)  # API CALL 6
+    clean_text = text_cleaner(main_text_extracted)
     with open(os.path.join(path_to_missing_text, "missing_passage.txt"), "w") as f:
         f.write(clean_text)
     empty_folder(path_to_previous_text)
@@ -184,32 +179,26 @@ def get_response_from_raw_image(file_path):
         logger.error(str(e))
         return results
 
-    raw_ocr_result = ocr_claude(processed_image_url)  # API CALL 1
-    print(raw_ocr_result)
+    raw_ocr_result = ocr_claude(processed_image_url)
+
     if raw_ocr_result is None:
         results["status"] = "error"
-        results["error_message"] = "There is an issue with the API call"
-        logger.error("An error occurred with the API while processing the image")
+        results["error_message"] = "OCR API call failed"
+        logger.error("OCR API call failed while processing the image")
         return results
 
-    ocr_status = get_ocr_status(raw_ocr_result)  # API CALL 2
-    print(ocr_status)
+    ocr_status = get_ocr_status(raw_ocr_result)
     if ocr_status == "false":
         results["status"] = "error"
-        results["error_message"] = (
-            "Unable to retrieve texts from the image or the text is not related to a problem-solving question"
-        )
-        logger.error("An error occurred while processing the image")
+        results["error_message"] = "Unable to extract exam question text from the image"
+        logger.error("OCR did not detect valid exam content")
         return results
 
-    verbal_or_quant = verbal_or_quantitive(raw_ocr_result)  # API CALL 3
-    print(verbal_or_quant)
+    verbal_or_quant = verbal_or_quantitive(raw_ocr_result)
 
     if verbal_or_quant == "verbal":
-        main_text_extracted = extract_main_text(raw_ocr_result)  # API CALL 4
-        print(main_text_extracted)
+        main_text_extracted = extract_main_text(raw_ocr_result)
         is_text_complete = check_if_text_complete(main_text_extracted)
-        print(is_text_complete)
 
         if is_text_complete:
             ocr_text, response_text, answer_choice = process_complete_question(raw_ocr_result)
@@ -220,14 +209,12 @@ def get_response_from_raw_image(file_path):
             )
     else:
         try:
-            print("using_claude_ocr")
             claude_ocr_result = ocr_claude(processed_image_url)
-            print("CLAUDE OCR : ",claude_ocr_result)
             ocr_text, response_text, answer_choice = process_complete_question(claude_ocr_result)
         except Exception as e:
             results["status"] = "error"
             results["error_message"] = str(e)
-            logger.error(f"Error during Claude OCR: {str(e)}")
+            logger.error(f"Error during quantitative processing: {e}")
             return results
 
     results["status"] = "success"
@@ -236,7 +223,3 @@ def get_response_from_raw_image(file_path):
     results["response_text"] = response_text
     results["answer_choice"] = answer_choice
     return results
-
-
-#file_path = "/home/aime/python-environments/exam_script_deploy/image_20240901_160635 (1).jpg"
-#print(get_response_from_raw_image(file_path))
