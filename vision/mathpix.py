@@ -38,5 +38,5 @@ def ocr_mathpix(path_to_image):
 
 
 print(
-    ocr_mathpix("/home/aime/python-environments/exam_script_deploy/image_folder/CROPPED_3_image_20240406_111227.jpeg")
+    ocr_mathpix("/home/aime/python-environments/exam_script_deploy/image_20240730_151353 (1).jpg")
 )
