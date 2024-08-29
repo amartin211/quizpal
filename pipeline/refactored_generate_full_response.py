@@ -24,8 +24,8 @@ from prompts_template.prompt_engineering_refined import (
     extract_main_text,
     extract_question,
     structure_response,
-    answer_ps_question,
-    answer_ds_question,
+    answer_ds_question_with_claude,
+    answer_ps_question_with_claude,
     answer_rc_question,
     answer_cr_question,
     answer_sc_question,
@@ -76,9 +76,9 @@ def process_complete_question(raw_ocr_result):
     if question_type == "critical reasoning":
         final_response = answer_cr_question(clean_question)  # API CALL 6
     elif question_type == "problem solving":
-        final_response = answer_ps_question(clean_question)  # API CALL 6
+        final_response = answer_ps_question_with_claude(clean_question)  # API CALL 6
     elif question_type == "data sufficiency":
-        final_response = answer_ds_question(clean_question)  # API CALL 6
+        final_response = answer_ds_question_with_claude(clean_question)  # API CALL 6
     elif question_type == "sentence correction":
         final_response = answer_sc_question(clean_question)  # API CALL 6
     elif question_type == "reading comprehension":
@@ -226,5 +226,5 @@ def get_response_from_raw_image(file_path):
     return results
 
 
-# file_path = "/home/aime/python-environments/exam_script_deploy/s3_images/000000000902a28f/image_20240403_130531.jpg"
+# file_path = "/home/aime/python-environments/exam_script_deploy/s3_images/20240112190852.jpg"
 # print(get_response_from_raw_image(file_path))

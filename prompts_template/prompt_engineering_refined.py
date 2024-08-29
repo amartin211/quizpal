@@ -10,6 +10,8 @@ from prompts_template.exercice_samples_prompts import (
     text_completness_examples,
 )
 from openai import OpenAI
+import anthropic
+import os
 
 
 client = OpenAI()
@@ -281,6 +283,52 @@ def answer_ps_question(prompt, model="gpt-4"):
 
     response = client.chat.completions.create(model=model, messages=messages, temperature=0)
     return response.choices[0].message.content
+
+
+def answer_ps_question_with_claude(prompt):
+
+    prompt_to_add = f""" 
+    - Problem 10: {prompt} 
+    - Explanation for Problem 10: """
+
+    client = anthropic.Anthropic(
+        api_key=os.getenv("ANTHROPIC_API_KEY"),
+    )
+    message = client.messages.create(
+        model="claude-3-5-sonnet-20240620",
+        max_tokens=500,
+        system="You are a world leading expert at GMAT exam.\
+            When given a problem you break it down step by step.\
+            You verify that your reasonning is correct and that you have find the right answer.",
+        messages=[
+            {"role": "user", "content": problem_solving_examples + prompt_to_add},
+        ],
+    )
+
+    return message.content[0].text
+
+
+def answer_ds_question_with_claude(prompt):
+
+    prompt_to_add = f""" 
+    - Problem 6: {prompt} 
+    - Explanation for Problem 6: """
+
+    client = anthropic.Anthropic(
+        api_key=os.getenv("ANTHROPIC_API_KEY"),
+    )
+    message = client.messages.create(
+        model="claude-3-5-sonnet-20240620",
+        max_tokens=500,
+        system="You are a world leading expert at GMAT exam.\
+            When given a problem you break it down step by step.\
+            You verify that your reasonning is correct and that you have find the right answer.",
+        messages=[
+            {"role": "user", "content": data_sufficiency_examples + prompt_to_add},
+        ],
+    )
+
+    return message.content[0].text
 
 
 def answer_ds_question(prompt, model="gpt-4"):
