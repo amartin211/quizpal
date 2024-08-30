@@ -12,6 +12,12 @@ def image_uri(filename):
     image_data = open(filename, "rb").read()
     return "data:image/jpg;base64," + base64.b64encode(image_data).decode()
 
+def image_uri_from_url(url):
+    response = requests.get(url)
+    response.raise_for_status()
+    image_data = response.content
+    return "data:image/jpg;base64," + base64.b64encode(image_data).decode()
+
 
 def ocr_mathpix(path_to_image):
     try:
@@ -21,7 +27,7 @@ def ocr_mathpix(path_to_image):
         r = requests.post(
             "https://api.mathpix.com/v3/text",
             json={
-                "src": image_uri(path_to_image),
+                "src": image_uri_from_url(path_to_image),
                 "math_inline_delimiters": ["$", "$"],
                 "rm_spaces": True,
             },
@@ -38,5 +44,5 @@ def ocr_mathpix(path_to_image):
 
 
 print(
-    ocr_mathpix("/home/aime/python-environments/exam_script_deploy/image_20240730_151353 (1).jpg")
+    ocr_mathpix("https://bucketforprocessedimg.s3.eu-north-1.amazonaws.com/00000000b5a3d56b/image_20240730_150806.jpg")
 )
