@@ -7,6 +7,7 @@ from botocore.exceptions import ClientError
 
 from vision.image_preprocessing import preprocessing_raw_image_double_detect
 from vision.openai_OCR import openai_ocr
+from vision.mathpix_ocr import ocr_mathpix
 from utils import (
     empty_folder,
     similarityscore,
@@ -216,7 +217,15 @@ def get_response_from_raw_image(file_path):
                 main_text_extracted, question, path_to_previous_text, path_to_missing_text
             )
     else:
-        ocr_text, response_text, answer_choice = process_complete_question(raw_ocr_result)
+        try:
+            print("using_mathpix_ocr")
+            mathpix_ocr_result = ocr_mathpix(processed_image_url)
+            ocr_text, response_text, answer_choice = process_complete_question(mathpix_ocr_result)
+        except ValueError as e:
+            results["status"] = "error"
+            results["error_message"] = str(e)
+            logger.error(f"Error during Mathpix OCR: {str(e)}")
+            return results
 
     results["status"] = "success"
     results["error_message"] = "No errors"
@@ -226,5 +235,5 @@ def get_response_from_raw_image(file_path):
     return results
 
 
-# file_path = "/home/aime/python-environments/exam_script_deploy/s3_images/20240112190852.jpg"
-# print(get_response_from_raw_image(file_path))
+#file_path = "/home/aime/python-environments/exam_script_deploy/image_20240730_151353 (1).jpg"
+#print(get_response_from_raw_image(file_path))
