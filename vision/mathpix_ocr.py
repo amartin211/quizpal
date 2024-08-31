@@ -43,6 +43,6 @@ def ocr_mathpix(path_to_image):
         raise ValueError("No text could have been extracted from this image") from e
 
 
-print(
-    ocr_mathpix("https://bucketforprocessedimg.s3.eu-north-1.amazonaws.com/00000000b5a3d56b/image_20240730_150806.jpg")
-)
+#print(
+#    ocr_mathpix("https://bucketforprocessedimg.s3.eu-north-1.amazonaws.com/00000000261981f9/image_20240406_110346.jpg")
+#)
