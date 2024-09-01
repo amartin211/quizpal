@@ -8,6 +8,7 @@ from botocore.exceptions import ClientError
 from vision.image_preprocessing import preprocessing_raw_image_double_detect
 from vision.openai_OCR import openai_ocr
 from vision.mathpix_ocr import ocr_mathpix
+from vision.claude_ocr import ocr_claude
 from utils import (
     empty_folder,
     similarityscore,
@@ -202,6 +203,7 @@ def get_response_from_raw_image(file_path):
         return results
 
     verbal_or_quant = verbal_or_quantitive(raw_ocr_result)  # API CALL 3
+    print(verbal_or_quant)
 
     if verbal_or_quant == "verbal":
         main_text_extracted = extract_main_text(raw_ocr_result)  # API CALL 4
@@ -218,13 +220,14 @@ def get_response_from_raw_image(file_path):
             )
     else:
         try:
-            print("using_mathpix_ocr")
-            mathpix_ocr_result = ocr_mathpix(processed_image_url)
-            ocr_text, response_text, answer_choice = process_complete_question(mathpix_ocr_result)
-        except ValueError as e:
+            print("using_claude_ocr")
+            claude_ocr_result = ocr_claude(processed_image_url)
+            print("CLAUDE OCR : ",claude_ocr_result)
+            ocr_text, response_text, answer_choice = process_complete_question(claude_ocr_result)
+        except Exception as e:
             results["status"] = "error"
             results["error_message"] = str(e)
-            logger.error(f"Error during Mathpix OCR: {str(e)}")
+            logger.error(f"Error during Claude OCR: {str(e)}")
             return results
 
     results["status"] = "success"
@@ -235,5 +238,5 @@ def get_response_from_raw_image(file_path):
     return results
 
 
-#file_path = "/home/aime/python-environments/exam_script_deploy/image_20240730_151353 (1).jpg"
+#file_path = "/home/aime/python-environments/exam_script_deploy/image_20240901_121222 (1).jpg"
 #print(get_response_from_raw_image(file_path))

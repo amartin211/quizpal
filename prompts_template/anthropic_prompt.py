@@ -18,7 +18,7 @@ def check_text_completness(prompt):
         api_key=api_key,
     )
     message = client.messages.create(
-        model="claude-3-sonnet-20240229",
+        model="claude-3-5-sonnet-20240620",
         max_tokens=100,
         system="""Analyze the given passage, which is a result of an OCR process, to determine if it's complete. Follow these steps strictly:
 
@@ -63,7 +63,7 @@ def extract_main_text(ocr_result):
     """
 
     message = client.messages.create(
-        model="claude-3-sonnet-20240229", max_tokens=1000, messages=[{"role": "user", "content": prompt}]
+        model="claude-3-5-sonnet-20240620", max_tokens=1000, messages=[{"role": "user", "content": prompt}]
     )
 
     return message.content[0].text

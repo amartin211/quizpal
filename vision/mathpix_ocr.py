@@ -44,5 +44,5 @@ def ocr_mathpix(path_to_image):
 
 
 #print(
-#    ocr_mathpix("https://bucketforprocessedimg.s3.eu-north-1.amazonaws.com/00000000261981f9/image_20240406_110346.jpg")
+#    ocr_mathpix("https://bucketforprocessedimg.s3.eu-north-1.amazonaws.com/00000000b5a3d56b/image_20240901_121222.jpg")
 #)

@@ -198,7 +198,7 @@ def check_text_completness(prompt, model="gpt-3.5-turbo"):
     return response.choices[0].message.content
 
 
-def extract_main_text(ocr_result, model="gpt-3.5-turbo"):
+def extract_main_text(ocr_result, model="gpt-4o"):
 
     messages = [
         {
@@ -215,13 +215,13 @@ def extract_main_text(ocr_result, model="gpt-3.5-turbo"):
     return response.choices[0].message.content
 
 
-def verbal_or_quantitive(prompt, model="gpt-3.5-turbo"):
+def verbal_or_quantitive(prompt, model="gpt-4o"):
     messages = [
         {
             "role": "system",
             "content": "Given the raw result of an OCR, your task is to defined whether the extracted text is related to a \
-            verbal or a quantitive question. It is a verbal question with a lot of text you output 'verbal' \
-            if it is a quantitive question you output 'quantitive'.",
+            verbal or a quantitative question. It is a verbal question with a lot of text you output 'verbal' \
+            if it is a quantitive question you output 'quantitative'.",
         },
         {"role": "user", "content": prompt.strip()},
     ]
