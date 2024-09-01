@@ -43,6 +43,5 @@ def ocr_claude(image_url):
     return message.content[0].text
 
 # Example usage
-#image_url = "https://bucketforprocessedimg.s3.eu-north-1.amazonaws.com/00000000b5a3d56b/image_20240901_121222.jpg"
-#extracted_text = extract_text_from_image(image_url)
-#print(extracted_text)
+#image_url = "https://bucketforprocessedimg.s3.eu-north-1.amazonaws.com/00000000b5a3d56b/image_20240901_154239.jpg"
+#extracted_text = ocr_claude(image_url)

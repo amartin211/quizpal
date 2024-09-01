@@ -184,7 +184,7 @@ def get_response_from_raw_image(file_path):
         logger.error(str(e))
         return results
 
-    raw_ocr_result = openai_ocr(processed_image_url)  # API CALL 1
+    raw_ocr_result = ocr_claude(processed_image_url)  # API CALL 1
     print(raw_ocr_result)
     if raw_ocr_result is None:
         results["status"] = "error"
@@ -238,5 +238,5 @@ def get_response_from_raw_image(file_path):
     return results
 
 
-#file_path = "/home/aime/python-environments/exam_script_deploy/image_20240901_121222 (1).jpg"
+#file_path = "/home/aime/python-environments/exam_script_deploy/image_20240901_160635 (1).jpg"
 #print(get_response_from_raw_image(file_path))

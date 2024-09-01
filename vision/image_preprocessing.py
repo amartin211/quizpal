@@ -143,7 +143,6 @@ def improved_rotate_image_using_lines_two(img_path):
         # If no lines are detected, return the original image
         return image
 
-
 def preprocessing_raw_image_double_detect(path_raw_img, processed_path):
 
     try:
