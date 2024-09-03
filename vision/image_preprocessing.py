@@ -1,14 +1,12 @@
-import logging
-import numpy as np
-import cv2
-from ultralytics import YOLO
-import logging
-import uuid
 import os
+import uuid
+import logging
 
+import cv2
+import numpy as np
+from ultralytics import YOLO
 
-# Basic configuration of logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
