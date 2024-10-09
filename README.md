@@ -4,7 +4,7 @@ An AI-powered GMAT exam assistant that processes screenshots of exam questions a
 
 ## Hardware
 
-The physical setup consists of a 3D-printed enclosure housing the compute unit (connected via USB), paired with a custom 3D-printed mounting stand for positioning. The device connects over Wi-Fi or 4G to communicate with the cloud backend. Status LEDs on the enclosure provide real-time feedback on the device state.
+The physical setup consists of a 3D-printed enclosure housing a Raspberry Pi Zero paired with an Ultra HD Arducam mini camera, connected to an external display via HDMI. A vibration module provides haptic feedback for notifications. The device connects over Wi-Fi or 4G to communicate with the cloud backend, and a custom 3D-printed mounting stand allows flexible positioning. Status LEDs on the enclosure provide real-time visual feedback on the device state.
 
 <table>
   <tr>
