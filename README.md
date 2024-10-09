@@ -6,7 +6,16 @@ An AI-powered GMAT exam assistant that processes screenshots of exam questions a
 
 The physical setup consists of a 3D-printed enclosure housing the compute unit (connected via USB), paired with a custom 3D-printed mounting stand for positioning. Status LEDs on the enclosure provide real-time feedback on the device state.
 
-![QuizPal hardware device and mount](IMG_2611.jpg)
+<table>
+  <tr>
+    <td><img src="IMG_2611.jpg" width="400"></td>
+    <td><img src="IMG_2659.jpg" width="400"></td>
+  </tr>
+  <tr>
+    <td><img src="IMG_2665.jpg" width="400"></td>
+    <td><img src="IMG_2679.jpg" width="400"></td>
+  </tr>
+</table>
 
 ## Architecture
 
