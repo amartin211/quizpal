@@ -12,7 +12,7 @@ The physical setup consists of a 3D-printed enclosure housing the compute unit (
     <td><img src="IMG_2659.jpg" width="400"></td>
   </tr>
   <tr>
-    <td><img src="IMG_2665.jpg" width="400"></td>
+    <td><img src="IMG_2667.jpg" width="400"></td>
     <td><img src="IMG_2679.jpg" width="400"></td>
   </tr>
 </table>
