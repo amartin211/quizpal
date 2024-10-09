@@ -2,6 +2,12 @@
 
 An AI-powered GMAT exam assistant that processes screenshots of exam questions and returns structured answers in real-time via WebSocket.
 
+## Hardware
+
+The physical setup consists of a 3D-printed enclosure housing the compute unit (connected via USB), paired with a custom 3D-printed mounting stand for positioning. Status LEDs on the enclosure provide real-time feedback on the device state.
+
+![QuizPal hardware device and mount](IMG_2611.jpg)
+
 ## Architecture
 
 ```
