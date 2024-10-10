@@ -35,7 +35,7 @@ def get_completion(prompt, model="gpt-4"):
     messages = [
         {
             "role": "system",
-            "content": "You are an expert in GMAT exam formatting. Given a piece of text, your tasks are as follows:\n\n\
+            "content": "You are an expert in multiple choices exam formatting. Given a piece of text, your tasks are as follows:\n\n\
             1. **Passage Formatting**:\n\
                 - Detect and remove any characters at the beginning or end of the passage that are inconsistent with the content.\n\
                 - Place the characters '###' at the beginning and end of the passage.\n\n\
@@ -57,7 +57,7 @@ def get_completion(prompt, model="gpt-4"):
                     - reading comprehension\n\
                     - data sufficiency\n\
                     - sentence correction\n\
-                And the second element being the clean formated GMAT question as defined in items 1 to 4\n\
+                And the second element being the clean formated exam question as defined in items 1 to 4\n\
            ",
         },
         {"role": "user", "content": cleaning_text_examples + prompt_to_add},
@@ -77,7 +77,7 @@ def merge_two_texts_into_one(prompt, model="gpt-3.5-turbo"):
     messages = [
         {
             "role": "system",
-            "content": "You are a world leading expert at GMAT exam.\
+            "content": "You are a world leading expert at multiple choices exam.\
                 Given a piece of text that contain two passages separated by /// your task is to combined the two texts by removing the duplicated texts and output a clean text surounded by ###",
         },
         {"role": "user", "content": combining_text_example + prompt_to_add},
@@ -110,7 +110,7 @@ def text_cleaner(prompt, model="gpt-3.5-turbo"):
     messages = [
         {
             "role": "system",
-            "content": "You are a renowned expert in GMAT exam formatting.\n\
+            "content": "You are a renowned expert in multiple choices exam formatting.\n\
             When presented with a text passage, your primary responsibility is to cleanse it.\n\
             This involves detecting and eliminating any unrelated characters or elements, especially at the beginning or end of the passage.\n\
             The output should be the purified text, free from these extraneous details. You will not change any text within the passage itself.",
@@ -126,12 +126,12 @@ def question_cleaner(prompt, model="gpt-3.5-turbo"):
     messages = [
         {
             "role": "system",
-            "content": "You're a recognized GMAT exam expert.\n"
+            "content": "You're a recognized multiple choices exam expert.\n"
             "When presented with a text, your duties include:\n\n"
             "1. Text Cleansing:\n"
             "   - Eliminate any unrelated elements, particularly at the start or end of the passage.\n\n"
             "2. Question Formatting:\n"
-            "   - Frame the main content as a GMAT Verbal reading comprehension question but do not alter the question by changing the wordings.\n"
+            "   - Frame the main content as a verbal reading comprehension question but do not alter the question by changing the wordings.\n"
             "   - The main question should be enclosed with '***'.\n"
             "   - Present the five option choices, labeled as A) to E). Each option should be wrapped with '@@@'.\n\n"
             "Example:\n\n"
@@ -276,7 +276,7 @@ def answer_ps_question(prompt, model="gpt-4"):
     messages = [
         {
             "role": "system",
-            "content": "You are a world leading expert at GMAT exam.\
+            "content": "You are a world leading expert at multiple choices exam.\
             When given a problem you break it down step by step.\
             You verify that your reasonning is correct and that you have find the right answer.",
         },
@@ -299,7 +299,7 @@ def answer_ps_question_with_claude(prompt):
     message = client.messages.create(
         model="claude-3-5-sonnet-20240620",
         max_tokens=500,
-        system="You are a world leading expert at GMAT exam.\
+        system="You are a world leading expert at multiple choices exam.\
             When given a problem you break it down step by step.\
             You verify that your reasonning is correct and that you have find the right answer.",
         messages=[
@@ -322,7 +322,7 @@ def answer_ds_question_with_claude(prompt):
     message = client.messages.create(
         model="claude-3-5-sonnet-20240620",
         max_tokens=500,
-        system="You are a world leading expert at GMAT exam.\
+        system="You are a world leading expert at multiple choices exam.\
             When given a problem you break it down step by step.\
             You verify that your reasonning is correct and that you have find the right answer.",
         messages=[
@@ -341,7 +341,7 @@ def answer_ds_question(prompt, model="gpt-4"):
     messages = [
         {
             "role": "system",
-            "content": "You are a world leading expert at GMAT exam.\
+            "content": "You are a world leading expert at multiple choices exam.\
             When given a problem you break it down step by step.\
             You verify that your reasonning is correct and that you have find the right answer.",
         },
@@ -360,7 +360,7 @@ def answer_rc_question(prompt, model="gpt-4"):
     messages = [
         {
             "role": "system",
-            "content": "You are a world leading expert at GMAT exam.\
+            "content": "You are a world leading expert at multiple choices exam.\
             When given a problem you break it down step by step.\
             You verify that your reasonning is correct and that you have find the right answer.",
         },
@@ -379,7 +379,7 @@ def answer_cr_question(prompt, model="gpt-4"):
     messages = [
         {
             "role": "system",
-            "content": "You are a world leading expert at GMAT exam.\
+            "content": "You are a world leading expert at multiple choices exam.\
             When given a problem you break it down step by step.\
             You verify that your reasonning is correct and that you have find the right answer.",
         },
@@ -398,7 +398,7 @@ def answer_sc_question(prompt, model="gpt-4"):
     messages = [
         {
             "role": "system",
-            "content": "You are a world leading expert at GMAT exam.\
+            "content": "You are a world leading expert at multiple choices exam.\
             When given a problem you break it down step by step.\
             You verify that your reasonning is correct and that you have find the right answer.",
         },

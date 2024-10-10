@@ -1,6 +1,6 @@
 # QuizPal
 
-An AI-powered GMAT exam assistant that processes screenshots of exam questions and returns structured answers in real-time via WebSocket.
+An AI-powered multiple choices exam assistant that processes screenshots of exam questions and returns structured answers in real-time via WebSocket.
 
 ## Hardware
 
@@ -35,7 +35,7 @@ The physical setup consists of a 3D-printed enclosure housing a Raspberry Pi Zer
 
 ## How It Works
 
-1. **Image Upload** — A client uploads a screenshot of a GMAT question to S3
+1. **Image Upload** — A client uploads a screenshot of an exam question to S3
 2. **Object Detection** — YOLOv8 detects the screen/device in the image and crops the relevant area
 3. **Image Preprocessing** — OpenCV rotates and cleans the cropped image using Hough line detection
 4. **OCR** — Claude 3.5 Sonnet extracts text from the processed image
@@ -47,7 +47,7 @@ The physical setup consists of a 3D-printed enclosure housing a Raspberry Pi Zer
 
 - **Multi-stage image pipeline**: Two-pass YOLO detection (device → screen) with rotation correction
 - **Multi-image reading comprehension**: Handles passages split across multiple screenshots by storing partial text and merging when complete
-- **Question-type routing**: Different prompt strategies for each GMAT question category
+- **Question-type routing**: Different prompt strategies for each exam question category
 - **Real-time feedback**: WebSocket notifications for instant answer delivery
 - **Serverless deployment**: Runs entirely on AWS Lambda with Docker containers
 
