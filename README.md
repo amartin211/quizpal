@@ -3,7 +3,7 @@
 **QuizPal**
 Proof-of-concept demonstration of real-time wearable AI systems and edge-to-cloud pipelines. Built purely as an engineering challenge to explore low-latency computer vision + LLM integration on constrained hardware. Not intended for any use that violates academic or professional integrity policies.
 
-A real-time wearable AI visual assistant that processes screenshots of exam questions and returns structured answers in real-time via WebSocket.
+A real-time wearable AI visual assistant that processes visual input from custom hardware and returns structured answers in real-time via WebSocket.
 
 ## Hardware
 
