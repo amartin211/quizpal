@@ -1,5 +1,8 @@
 # QuizPal
 
+**QuizPal**
+Proof-of-concept demonstration of real-time wearable AI systems and edge-to-cloud pipelines. Built purely as an engineering challenge to explore low-latency computer vision + LLM integration on constrained hardware. Not intended for any use that violates academic or professional integrity policies.
+
 An AI-powered multiple choices exam assistant that processes screenshots of exam questions and returns structured answers in real-time via WebSocket.
 
 ## Hardware
