@@ -52,14 +52,16 @@ def openai_ocr(image_url):
 
 if __name__ == "__main__":
     # Test the openai_ocr function with an S3 image
-   # s3_image_url = "s3://bucketforprocessedimg/00000000b5a3d56b/image_20240730_151125.jpg"
-    
+    # s3_image_url = "s3://bucketforprocessedimg/00000000b5a3d56b/image_20240730_151125.jpg"
+
     # Convert S3 URL to a publicly accessible HTTP URL
     # Note: This assumes you have the necessary permissions and the bucket is configured for public access
-    http_image_url = f"https://bucketforprocessedimg.s3.eu-north-1.amazonaws.com/00000000b5a3d56b/image_20240901_121222.jpg"
-    
+    http_image_url = (
+        f"https://bucketforprocessedimg.s3.eu-north-1.amazonaws.com/00000000b5a3d56b/image_20240901_121222.jpg"
+    )
+
     result = openai_ocr(http_image_url)
-    
+
     if result:
         print("OCR Result:")
         print(result)

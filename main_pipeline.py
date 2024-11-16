@@ -27,8 +27,31 @@ sns_client = boto3.client("sns")
 dynamodb = boto3.resource("dynamodb")
 results_table = dynamodb.Table("intermediary_results")
 connectionID_table = dynamodb.Table("WebSocketConnections")
+secrets_manager = boto3.client("secretsmanager")
 
 ARN_SNS = "arn:aws:sns:eu-north-1:583247773415:receive_sms_response"
+
+
+def get_client_id_from_device(device_id, connection_table):
+    """Get client ID associated with device ID from DynamoDB"""
+    try:
+        response = connection_table.get_item(Key={"device_id": device_id})
+        return response["Item"]["client_id"]
+    except Exception as e:
+        logging.error(f"Error getting client ID: {str(e)}")
+        raise
+
+
+def get_openai_secret(client_id):
+    """Get OpenAI credentials from Secrets Manager"""
+    secret_name = f"openai_credentials_user_{client_id}"
+    try:
+        response = secrets_manager.get_secret_value(SecretId=secret_name)
+        secrets = json.loads(response["SecretString"])
+        return secrets["openai_api_key"]
+    except Exception as e:
+        logging.error(f"Error getting OpenAI secret: {str(e)}")
+        raise
 
 
 def lambda_handler(event, context):
@@ -58,6 +81,12 @@ def lambda_handler(event, context):
     s3.download_file(bucket, key, tmp_file_path)
 
     try:
+        client_id = get_client_id_from_device(device_id, connectionID_table)
+        openai_api_key = get_openai_secret(client_id)
+
+        # Set OpenAI API key as environment variable
+        os.environ["OPENAI_API_KEY"] = openai_api_key
+
         results = get_response_from_raw_image(tmp_file_path)
         # sns_client.publish(TopicArn=ARN_SNS, Message=str(results['answer_choice']))
         connection_id = get_connection_id(device_id, connectionID_table)
