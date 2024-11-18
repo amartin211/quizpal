@@ -6,6 +6,7 @@
 
 import sys
 from pipeline.refactored_generate_full_response import get_response_from_raw_image
+from pipeline.long_text_processing_lambda import process_multiple_images
 from utils import get_connection_id, send_to_websocket
 
 import os
@@ -54,6 +55,42 @@ def get_openai_secret(client_id):
         raise
 
 
+def save_text_to_s3(text, bucket, device_id, session_id):
+    # Define the S3 object key
+    s3_key = f"{device_id}/{session_id}/processed_text.txt"
+
+    try:
+        # Upload the text to S3
+        s3.put_object(Body=text.encode("utf-8"), Bucket=bucket, Key=s3_key, ContentType="text/plain")
+        logger.info(f"Saved processed text to s3://{bucket}/{s3_key}")
+    except Exception as e:
+        logger.error(f"Failed to save processed text to S3: {str(e)}")
+
+
+def process_long_press_images(bucket, device_id, session_id):
+    prefix = f"{device_id}/{session_id}/"
+    response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
+
+    image_keys = []
+    for obj in response.get("Contents", []):
+        key = obj["Key"]
+        filename = key.split("/")[-1]
+        if filename != "manifest.txt":
+            image_keys.append(key)
+
+    # Download all images to /tmp
+    image_paths = []
+    for key in image_keys:
+        filename = key.split("/")[-1]
+        tmp_file_path = os.path.join("/tmp", filename)
+        s3.download_file(bucket, key, tmp_file_path)
+        image_paths.append(tmp_file_path)
+
+    # Process all images together
+    result = process_multiple_images(image_paths)
+    return result
+
+
 def lambda_handler(event, context):
 
     print("sucess")
@@ -64,38 +101,39 @@ def lambda_handler(event, context):
 
     # Extract the device ID from the object key
     # Assuming the object key format is "DEVICE_ID/unique_filename.jpg"
-    device_id = key.split("/")[0]
+    parts = key.split("/")
+    device_id = parts[0]
+    session_id = parts[1]
+    filename = parts[2] if len(parts) > 2 else ""
     print("device_id : ", device_id)
-
-    # filename = key.split("/")[-1]
-    # tmp_file_path = os.path.join("/tmp", filename)
-
-    tmp_file_path = os.path.join("/tmp", key)
+    logging.info(f"Device ID: {device_id}, Session ID: {session_id}, Filename: {filename}")
 
     print("bucket : ", bucket)
     print("key : ", key)
     print("tmp_file_path : ", tmp_file_path)
 
-    os.makedirs(os.path.dirname(tmp_file_path), exist_ok=True)
-
-    s3.download_file(bucket, key, tmp_file_path)
-
     try:
-        client_id = get_client_id_from_device(device_id, connectionID_table)
-        openai_api_key = get_openai_secret(client_id)
+        # client_id = get_client_id_from_device(device_id, connectionID_table)
+        # openai_api_key = get_openai_secret(client_id)
 
         # Set OpenAI API key as environment variable
-        os.environ["OPENAI_API_KEY"] = openai_api_key
+        # os.environ["OPENAI_API_KEY"] = openai_api_key
 
-        results = get_response_from_raw_image(tmp_file_path)
-        # sns_client.publish(TopicArn=ARN_SNS, Message=str(results['answer_choice']))
-        connection_id = get_connection_id(device_id, connectionID_table)
-        response_data = {"message": results["answer_choice"]}  # Replace with actual data
-        send_to_websocket(connection_id, response_data)
-
-        # Store results in DynamoDB
-
-        results_table.put_item(Item=results)
+        # Check if it's a manifest file
+        if filename == "manifest.txt":
+            # Process all images in the session
+            result = process_long_press_images(bucket, device_id, session_id)
+            save_text_to_s3(result, bucket, device_id, session_id)
+        else:
+            # For short press, process the single image
+            tmp_file_path = os.path.join("/tmp", key)
+            os.makedirs(os.path.dirname(tmp_file_path), exist_ok=True)
+            s3.download_file(bucket, key, tmp_file_path)
+            results = get_response_from_raw_image(tmp_file_path)
+            connection_id = get_connection_id(device_id, connectionID_table)
+            response_data = {"message": results["answer_choice"]}  # Replace with actual data
+            send_to_websocket(connection_id, response_data)
+            results_table.put_item(Item=results)
 
     except Exception as e:
         logging.error(f"An error occurred: {str(e)}")

@@ -85,6 +85,30 @@ def merge_two_texts_into_one(prompt, model="gpt-3.5-turbo"):
     return response.choices[0].message.content
 
 
+def merge_long_texts_into_one(text_content, model="gpt-4o"):
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are a highly intelligent assistant specializing in text reconstruction. "
+                "I will provide you with a set of text snippets extracted from a document via OCR. "
+                "These snippets may contain noise, such as unrelated or extraneous text. Additionally, "
+                "some snippets may include questions followed by multiple-choice answers. "
+                "Some text may appear to be incomplete or cut off due to the OCR process. "
+                "Your goal is to:\n"
+                "- Reconstruct the original text as accurately as possible by analyzing and reassembling the provided pieces.\n"
+                "- Include incomplete or cut-off text fragments in the final reconstruction, even if they do not form a complete sentence.\n"
+                "- Maintain the exact wording, punctuation, and formatting from the original text without introducing any changes or corrections.\n"
+                "- Disregard unrelated or extraneous pieces of text, including any questions along with their multiple-choice answers."
+            ),
+        },
+        {"role": "user", "content": text_content},
+    ]
+
+    response = client.chat.completions.create(model=model, messages=messages, temperature=0)
+    return response.choices[0].message.content
+
+
 def structure_response(prompt, model="gpt-3.5-turbo"):
 
     prompt_to_add = f""" 

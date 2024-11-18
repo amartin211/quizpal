@@ -143,6 +143,7 @@ def improved_rotate_image_using_lines_two(img_path):
         # If no lines are detected, return the original image
         return image
 
+
 def preprocessing_raw_image_double_detect(path_raw_img, processed_path):
 
     try:
@@ -183,3 +184,9 @@ def detect_tv_laptop(source, output_path):
     bbox = boxes.data[index][:4].astype(int)
 
     crop_and_save_image_with_bbox(source, output_path, bbox)
+
+
+if __name__ == "__main__":
+    image_path = "/home/aime/python-environments/exam_script_deploy/grouped_images /image_20241116_180946_760073.jpg"
+    output_path = "processed_image.jpg"
+    preprocessing_raw_image_double_detect(image_path, output_path)

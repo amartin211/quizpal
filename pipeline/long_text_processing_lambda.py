@@ -1,0 +1,82 @@
+import anthropic
+import requests
+from io import BytesIO
+import base64
+from pathlib import Path
+from vision.image_preprocessing import preprocessing_raw_image_double_detect
+from prompts_template.prompt_engineering_refined import merge_long_texts_into_one
+import os
+import boto3
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def ocr_claude(image_path):
+    # Initialize the Anthropic client
+    client = anthropic.Anthropic()
+
+    # Read the local image file
+    with open(image_path, "rb") as image_file:
+        base64_image = base64.b64encode(image_file.read()).decode("utf-8")
+
+    # Prepare the message with the image
+    message = client.messages.create(
+        model="claude-3-5-sonnet-20241022",
+        max_tokens=1000,
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": base64_image}},
+                    {
+                        "type": "text",
+                        "text": "Can you extract all the text in this image? \
+                        Make sure to include the text on the right and left side of the image even if it is cut off. \
+                        Do not include any other information, just output the entire raw text.",
+                    },
+                ],
+            }
+        ],
+    )
+
+    # Extract and return the text from Claude's response
+    return message.content[0].text
+
+
+def process_multiple_images(image_paths):
+    all_extracted_text = ""
+
+    # Iterate through all image paths
+    for image_path in image_paths:
+        try:
+            logger.info(f"Processing {os.path.basename(image_path)}...")
+            # Preprocess the image
+            processed_image_path = preprocess_image(image_path)
+
+            # Perform OCR on processed image
+            extracted_text = ocr_claude(processed_image_path)
+
+            # Append extracted text
+            all_extracted_text += f"=== Text from {os.path.basename(image_path)} ===\n{extracted_text}\n\n"
+        except Exception as e:
+            logger.error(f"Error processing {os.path.basename(image_path)}: {str(e)}")
+
+    # Merge the extracted texts
+    single_text = merge_long_texts_into_one(all_extracted_text)
+
+    for path in image_paths:
+        os.remove(path)
+
+    # Return the combined text
+    return single_text
+
+
+def preprocess_image(image_path):
+    # Create a temporary path for the processed image
+    processed_image_path = image_path.replace(".jpg", "_processed.jpg")
+
+    # Call your preprocessing function
+    preprocessing_raw_image_double_detect(image_path, processed_image_path)
+
+    return processed_image_path
