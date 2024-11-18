@@ -16,7 +16,7 @@ from utils import (
     put_image_to_s3,
     check_if_text_complete,
 )
-from prompts_template.prompt_engineering_refined import (
+from prompts_template.gmat_specifics.prompt_engineering_refined import (
     get_completion,
     merge_two_texts_into_one,
     text_cleaner,
@@ -222,7 +222,7 @@ def get_response_from_raw_image(file_path):
         try:
             print("using_claude_ocr")
             claude_ocr_result = ocr_claude(processed_image_url)
-            print("CLAUDE OCR : ",claude_ocr_result)
+            print("CLAUDE OCR : ", claude_ocr_result)
             ocr_text, response_text, answer_choice = process_complete_question(claude_ocr_result)
         except Exception as e:
             results["status"] = "error"
@@ -238,5 +238,5 @@ def get_response_from_raw_image(file_path):
     return results
 
 
-#file_path = "/home/aime/python-environments/exam_script_deploy/image_20240901_160635 (1).jpg"
-#print(get_response_from_raw_image(file_path))
+# file_path = "/home/aime/python-environments/exam_script_deploy/image_20240901_160635 (1).jpg"
+# print(get_response_from_raw_image(file_path))

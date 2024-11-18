@@ -5,12 +5,12 @@ import logging
 import boto3
 from botocore.exceptions import ClientError
 
-from vision.image_preprocessing import preprocessing_raw_image_double_detect
-from vision.claude_ocr import ocr_claude
+from image_processing.image_preprocessing import preprocessing_raw_image_double_detect
+from image_processing.ocr import claude_ocr_url
 from utils import put_image_to_s3
 
 
-from vision.check_similarity_lambda import find_matching_saved_text_s3
+from text_processing.check_matching_text_lambda import find_matching_saved_text_s3
 from prompts_template.general_prompts import (
     extract_text_and_question_with_choices,
     extract_question_and_choices,
@@ -113,7 +113,7 @@ def get_response_from_raw_image(file_path):
         logger.error(str(e))
         return results
 
-    raw_ocr_result = ocr_claude(processed_image_url)  # API CALL 1
+    raw_ocr_result = claude_ocr_url(processed_image_url)  # API CALL 1
     print(raw_ocr_result)
     if raw_ocr_result is None:
         results["status"] = "error"

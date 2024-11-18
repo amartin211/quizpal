@@ -1,12 +1,8 @@
 import anthropic
-import requests
-from io import BytesIO
 import base64
-from pathlib import Path
-from vision.image_preprocessing import preprocessing_raw_image_double_detect
-from prompts_template.prompt_engineering_refined import merge_long_texts_into_one
+from image_processing.image_preprocessing import preprocessing_raw_image_double_detect
+from prompts_template.gmat_specifics.prompt_engineering_refined import merge_long_texts_into_one
 import os
-import boto3
 import logging
 
 logger = logging.getLogger(__name__)

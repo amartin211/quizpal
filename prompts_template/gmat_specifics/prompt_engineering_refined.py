@@ -1,4 +1,4 @@
-from prompts_template.exercice_samples_prompts import (
+from prompts_template.gmat_specifics.exercice_samples_prompts import (
     problem_solving_examples,
     data_sufficiency_examples,
     reading_comprehension_sample,

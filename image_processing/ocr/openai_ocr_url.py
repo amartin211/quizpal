@@ -56,9 +56,7 @@ if __name__ == "__main__":
 
     # Convert S3 URL to a publicly accessible HTTP URL
     # Note: This assumes you have the necessary permissions and the bucket is configured for public access
-    http_image_url = (
-        f"https://bucketforprocessedimg.s3.eu-north-1.amazonaws.com/00000000b5a3d56b/image_20240901_121222.jpg"
-    )
+    http_image_url = f"https://bucketlambdafunc.s3.eu-north-1.amazonaws.com/00000000261981f9/image_20241114_155930.jpg"
 
     result = openai_ocr(http_image_url)
 
