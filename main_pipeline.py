@@ -5,7 +5,7 @@
 # docker push 583247773415.dkr.ecr.eu-north-1.amazonaws.com/myapp_image_repo:latest
 
 import sys
-from pipeline.refactored_generate_full_response import get_response_from_raw_image
+from pipeline.all_exams_generate_full_response import get_response_from_raw_image
 from pipeline.long_text_processing_lambda import process_multiple_images
 from utils import get_connection_id, send_to_websocket
 
