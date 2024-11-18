@@ -5,10 +5,8 @@ import logging
 import boto3
 from botocore.exceptions import ClientError
 
-from vision.image_preprocessing import preprocessing_raw_image_double_detect
-from vision.openai_OCR import openai_ocr
-from vision.mathpix_ocr import ocr_mathpix
-from vision.claude_ocr import ocr_claude
+from image_processing.image_preprocessing import preprocessing_raw_image_double_detect
+from image_processing.ocr.claude_ocr_url import ocr_claude
 from utils import (
     empty_folder,
     similarityscore,

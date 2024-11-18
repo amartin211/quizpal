@@ -1,5 +1,5 @@
 from openai import OpenAI
-from prompts_template.exercice_samples_prompts import cleaning_response_example
+from prompts_template.gmat_specifics.exercice_samples_prompts import cleaning_response_example
 
 client = OpenAI()
 
@@ -221,7 +221,7 @@ def structure_response(prompt, model="gpt-4o"):
         {
             "role": "system",
             "content": "Given a reasoning about a certain solution to a problem, your task is to indicate which specific letter the solution is referring to. \
-            You ONLY output the letter attached to the correct answer choice, that is, A, B, C, D or E.",
+            You ONLY output the letter attached to the correct answer choice, that is, A, B, C, D, E, ect... depending on the number of answer choices.",
         },
         {"role": "user", "content": cleaning_response_example + prompt_to_add},
     ]

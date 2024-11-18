@@ -6,7 +6,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 from image_processing.image_preprocessing import preprocessing_raw_image_double_detect
-from image_processing.ocr import claude_ocr_url
+from image_processing.ocr.claude_ocr_url import ocr_claude
 from utils import put_image_to_s3
 
 
@@ -31,16 +31,13 @@ BUCKET_LAMBDA = os.environ["BUCKET_LAMBDA"]
 BUCKET_PROCESSED_IMG = os.environ["BUCKET_PROCESSED_IMG"]
 BASE_DIR = "/tmp/"
 PROCESSED_FOLDER = "processed_folder"
-FULL_TEXT_FOLDER = "previous_full_passage"
 
 
 def initialize_directories():
     os.makedirs(BASE_DIR, exist_ok=True)
     path_to_processed = os.path.join(BASE_DIR, PROCESSED_FOLDER)
-    path_to_previous_text = os.path.join(BASE_DIR, FULL_TEXT_FOLDER)
     os.makedirs(path_to_processed, exist_ok=True)
-    os.makedirs(path_to_previous_text, exist_ok=True)
-    return path_to_processed, path_to_previous_text
+    return path_to_processed
 
 
 def process_image(file_path):
@@ -63,17 +60,17 @@ def process_complete_question(verbal_or_quant, raw_ocr_result):
         saved_full_passage = find_matching_saved_text_s3(raw_ocr_result, bucket_name=BUCKET_LAMBDA)
         if saved_full_passage is not None:
             # check similarity between raw_ocr_result and saved full passage
-            question_only = extract_question_and_choices(raw_ocr_result)
+            question_only = extract_question_and_choices(raw_ocr_result)  # API CALL 4
             clean_question = f"{question_only}\n{saved_full_passage}"
-            final_response = answer_verbal_question(clean_question)
+            final_response = answer_verbal_question(clean_question)  # API CALL 5
         else:
-            clean_question = extract_text_and_question_with_choices(raw_ocr_result)  # API CALL 5
-            final_response = answer_verbal_question(clean_question)
+            clean_question = extract_text_and_question_with_choices(raw_ocr_result)  # API CALL 4
+            final_response = answer_verbal_question(clean_question)  # API CALL 5
     else:
-        clean_question = extract_text_and_question_with_choices(raw_ocr_result)
-        final_response = answer_quantitative_question(clean_question)  # API CALL 6
+        clean_question = extract_text_and_question_with_choices(raw_ocr_result)  # API CALL 4
+        final_response = answer_quantitative_question(clean_question)  # API CALL 5
 
-    answer_choice = structure_response(final_response)  # API CALL 7
+    answer_choice = structure_response(final_response)  # API CALL 6
     return clean_question, final_response, answer_choice
 
 
@@ -99,8 +96,6 @@ def get_response_from_raw_image(file_path):
     original_image_url = f"https://{BUCKET_LAMBDA}.s3.eu-north-1.amazonaws.com/{device_id}/{file_name}"
     results["original_image"] = original_image_url
 
-    path_to_processed, path_to_previous_text, path_to_missing_text = initialize_directories()
-
     try:
         file_path_processed = process_image(file_path)
         processed_image_url = upload_image_to_s3(file_path_processed, device_id, file_name)
@@ -113,7 +108,7 @@ def get_response_from_raw_image(file_path):
         logger.error(str(e))
         return results
 
-    raw_ocr_result = claude_ocr_url(processed_image_url)  # API CALL 1
+    raw_ocr_result = ocr_claude(processed_image_url)  # API CALL 1
     print(raw_ocr_result)
     if raw_ocr_result is None:
         results["status"] = "error"

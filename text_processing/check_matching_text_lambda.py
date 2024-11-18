@@ -23,17 +23,21 @@ def calculate_similarity(text1, text2):
     return SequenceMatcher(None, text1, text2).ratio()
 
 
-def find_matching_saved_text_s3(new_text, bucket_name, similarity_threshold=0.8, matching_sentences_threshold=3):
+def find_matching_saved_text_s3(
+    new_text, bucket_name, device_id, similarity_threshold=0.8, matching_sentences_threshold=3
+):
     """
     Search through saved text files in S3 to find if new_text matches based on similar sentences.
     Returns the full text if found, None otherwise.
     """
     s3_client = boto3.client("s3")
 
+    prefix = f"{device_id}/"
+
     # List all objects in the bucket that match the pattern for processed texts
     paginator = s3_client.get_paginator("list_objects_v2")
     # Adjust the prefix if necessary; here we assume all processed texts are under the root
-    page_iterator = paginator.paginate(Bucket=bucket_name)
+    page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
 
     # Get sentences from the new text
     new_sentences = get_sentences(new_text)
