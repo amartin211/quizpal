@@ -5,6 +5,7 @@ from ultralytics import YOLO
 import logging
 import uuid
 import os
+import requests
 
 
 # Basic configuration of logging
@@ -22,7 +23,16 @@ def crop_and_save_image_with_bbox(input_file_path, output_file_path, box):
     - box (tuple): A tuple containing (x, y, w, h).
     """
     # with Image.open(input_file_path) as img:
-    img = cv2.imread(input_file_path)
+    # Handle URL inputs
+    if input_file_path.startswith("http"):
+        response = requests.get(input_file_path)
+        img_array = np.asarray(bytearray(response.content), dtype=np.uint8)
+        img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+    else:
+        img = cv2.imread(input_file_path)
+
+    if img is None:
+        raise ValueError(f"Failed to load image from {input_file_path}")
 
     top_margin = 50  # The size of the margin to add at the top
 
@@ -186,7 +196,10 @@ def detect_tv_laptop(source, output_path):
     crop_and_save_image_with_bbox(source, output_path, bbox)
 
 
-if __name__ == "__main__":
-    image_path = "/home/aime/python-environments/exam_script_deploy/grouped_images /image_20241116_180946_760073.jpg"
-    output_path = "processed_image.jpg"
-    preprocessing_raw_image_double_detect(image_path, output_path)
+# if __name__ == "__main__":
+#    image_path = (
+#        "/home/aime/python-environments/exam_script_deploy/all_images/grouped_images/image_20241116_180946_760073.jpg"
+# )
+# image_path = "https://bucketlambdafunc.s3.eu-north-1.amazonaws.com/00000000261981f9/image_20241114_155930.jpg"
+# output_path = "processed_image.jpg"
+# preprocessing_raw_image_double_detect(image_path, output_path)

@@ -7,7 +7,7 @@ from botocore.exceptions import ClientError
 
 from image_processing.image_preprocessing import preprocessing_raw_image_double_detect
 from image_processing.ocr.claude_ocr_url import ocr_claude
-from utils import (
+from pipeline.utils import (
     empty_folder,
     similarityscore,
     create_tuple_from_string,

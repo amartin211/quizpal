@@ -3,8 +3,8 @@ import requests
 from io import BytesIO
 import base64
 from pathlib import Path
-from vision.image_preprocessing import preprocessing_raw_image_double_detect
-from prompts_template.prompt_engineering_refined import merge_long_texts_into_one
+from image_processing.image_preprocessing import preprocessing_raw_image_double_detect
+from prompts_template.gmat_specifics.prompt_engineering_refined import merge_long_texts_into_one
 
 
 def ocr_claude(image_path):
@@ -92,24 +92,8 @@ def save_processed_text(text, folder_path, filename="processed_text.txt"):
 
 
 # Update the example usage section
-if __name__ == "__main__":
-    folder_path = "/home/aime/python-environments/exam_script_deploy/grouped_images"
-    output_file = "extracted_text.txt"
-    single_text = process_folder(folder_path, output_file)
-    print(single_text)
-
-    # text_content = open("extracted_text.txt", "r").read()
-    # single_text = merge_long_texts_into_one(text_content)
-    # print(single_text)
-
-
-# Example usage
-# image_path = "/home/aime/python-environments/exam_script_deploy/processed_image.jpg"
-# extracted_text = ocr_claude(image_path)
-# print(extracted_text)
-
-# Example usage
 # if __name__ == "__main__":
-#     folder_path = "/home/aime/python-environments/exam_script_deploy/grouped_images "
-#     output_file = "extracted_text.txt"
-#     process_folder(folder_path, output_file)
+#    folder_path = "/home/aime/python-environments/exam_script_deploy/grouped_images"
+#    output_file = "extracted_text.txt"
+#    single_text = process_folder(folder_path, output_file)
+#    print(single_text)

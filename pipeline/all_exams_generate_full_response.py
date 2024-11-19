@@ -41,7 +41,7 @@ def initialize_directories():
 
 
 def process_image(file_path):
-    path_to_processed, _, _ = initialize_directories()
+    path_to_processed = initialize_directories()
     file_name = Path(file_path).name
     file_path_processed = os.path.join(path_to_processed, file_name)
     processed_img = preprocessing_raw_image_double_detect(file_path, file_path_processed)
@@ -57,15 +57,15 @@ def upload_image_to_s3(file_path_processed, device_id, file_name):
 def process_complete_question(verbal_or_quant, raw_ocr_result):
 
     if verbal_or_quant == "verbal":
-        saved_full_passage = find_matching_saved_text_s3(raw_ocr_result, bucket_name=BUCKET_LAMBDA)
-        if saved_full_passage is not None:
-            # check similarity between raw_ocr_result and saved full passage
-            question_only = extract_question_and_choices(raw_ocr_result)  # API CALL 4
-            clean_question = f"{question_only}\n{saved_full_passage}"
-            final_response = answer_verbal_question(clean_question)  # API CALL 5
-        else:
-            clean_question = extract_text_and_question_with_choices(raw_ocr_result)  # API CALL 4
-            final_response = answer_verbal_question(clean_question)  # API CALL 5
+        # saved_full_passage = find_matching_saved_text_s3(raw_ocr_result, device_id, bucket_name=BUCKET_LAMBDA)
+        # if saved_full_passage is not None:
+        # check similarity between raw_ocr_result and saved full passage
+        #    question_only = extract_question_and_choices(raw_ocr_result)  # API CALL 4
+        #    clean_question = f"{question_only}\n{saved_full_passage}"
+        #    final_response = answer_verbal_question(clean_question)  # API CALL 5
+        # else:
+        clean_question = extract_text_and_question_with_choices(raw_ocr_result)  # API CALL 4
+        final_response = answer_verbal_question(clean_question)  # API CALL 5
     else:
         clean_question = extract_text_and_question_with_choices(raw_ocr_result)  # API CALL 4
         final_response = answer_quantitative_question(clean_question)  # API CALL 5
@@ -146,5 +146,5 @@ def get_response_from_raw_image(file_path):
     return results
 
 
-# file_path = "/home/aime/python-environments/exam_script_deploy/image_20240901_160635 (1).jpg"
-# print(get_response_from_raw_image(file_path))
+file_path = "https://bucketlambdafunc.s3.eu-north-1.amazonaws.com/00000000261981f9/image_20241114_155930.jpg"
+print(get_response_from_raw_image(file_path))

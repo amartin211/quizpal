@@ -40,5 +40,6 @@ def ocr_claude(image_url):
 
 
 # Example usage
-image_url = "https://bucketlambdafunc.s3.eu-north-1.amazonaws.com/00000000261981f9/image_20241114_155930.jpg"
-extracted_text = ocr_claude(image_url)
+# image_url = "https://bucketlambdafunc.s3.eu-north-1.amazonaws.com/00000000261981f9/image_20241114_155930.jpg"
+# extracted_text = ocr_claude(image_url)
+# print(extracted_text)

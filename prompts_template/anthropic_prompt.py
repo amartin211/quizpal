@@ -1,7 +1,7 @@
 api_key = "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"
 
 
-from prompts_template.exercice_samples_prompts import (
+from prompts_template.gmat_specifics.exercice_samples_prompts import (
     text_completness_examples,
 )
 import anthropic
