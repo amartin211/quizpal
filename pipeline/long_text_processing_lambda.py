@@ -4,7 +4,9 @@ from image_processing.image_preprocessing import preprocessing_raw_image_double_
 from prompts_template.gmat_specifics.prompt_engineering_refined import merge_long_texts_into_one
 import os
 import logging
+import boto3
 
+s3 = boto3.client("s3")
 logger = logging.getLogger(__name__)
 
 
@@ -76,3 +78,47 @@ def preprocess_image(image_path):
     preprocessing_raw_image_double_detect(image_path, processed_image_path)
 
     return processed_image_path
+
+
+def process_long_press_images(bucket, device_id, session_id):
+    prefix = f"{device_id}/{session_id}/"
+    response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
+
+    image_keys = []
+    for obj in response.get("Contents", []):
+        key = obj["Key"]
+        filename = key.split("/")[-1]
+        if filename != "manifest.txt":
+            image_keys.append(key)
+
+    # Download all images to /tmp
+    image_paths = []
+    for key in image_keys:
+        filename = key.split("/")[-1]
+        tmp_file_path = os.path.join("/tmp", filename)
+        s3.download_file(bucket, key, tmp_file_path)
+        image_paths.append(tmp_file_path)
+
+    # Process all images together
+    result = process_multiple_images(image_paths)
+    return result
+
+
+def save_text_to_s3(text, bucket, device_id, session_id):
+    # Define the S3 object key
+    s3_key = f"{device_id}/{session_id}/processed_text.txt"
+
+    try:
+        # Upload the text to S3
+        s3.put_object(Body=text.encode("utf-8"), Bucket=bucket, Key=s3_key, ContentType="text/plain")
+        logger.info(f"Saved processed text to s3://{bucket}/{s3_key}")
+    except Exception as e:
+        logger.error(f"Failed to save processed text to S3: {str(e)}")
+
+
+if __name__ == "__main__":
+    bucket = "bucketlambdafunc"
+    device_id = "00000000261981f9"
+    session_id = "b95335b6-d085-4381-b9d2-835b2fdeda0e"
+    result = process_long_press_images(bucket, device_id, session_id)
+    save_text_to_s3(result, bucket, device_id, session_id)

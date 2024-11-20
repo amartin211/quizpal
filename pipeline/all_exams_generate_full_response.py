@@ -7,6 +7,8 @@ from botocore.exceptions import ClientError
 
 from image_processing.image_preprocessing import preprocessing_raw_image_double_detect
 from image_processing.ocr.claude_ocr_url import ocr_claude
+from image_processing.ocr.mathpix_ocr_url import ocr_mathpix
+from image_processing.ocr.openai_ocr_url import openai_ocr
 from utils import put_image_to_s3
 
 
@@ -54,18 +56,23 @@ def upload_image_to_s3(file_path_processed, device_id, file_name):
     return processed_image_url
 
 
-def process_complete_question(verbal_or_quant, raw_ocr_result):
+def process_complete_question(verbal_or_quant, raw_ocr_result, device_id):
 
     if verbal_or_quant == "verbal":
-        # saved_full_passage = find_matching_saved_text_s3(raw_ocr_result, device_id, bucket_name=BUCKET_LAMBDA)
-        # if saved_full_passage is not None:
-        # check similarity between raw_ocr_result and saved full passage
-        #    question_only = extract_question_and_choices(raw_ocr_result)  # API CALL 4
-        #    clean_question = f"{question_only}\n{saved_full_passage}"
-        #    final_response = answer_verbal_question(clean_question)  # API CALL 5
-        # else:
-        clean_question = extract_text_and_question_with_choices(raw_ocr_result)  # API CALL 4
-        final_response = answer_verbal_question(clean_question)  # API CALL 5
+        saved_full_passage = find_matching_saved_text_s3(
+            raw_ocr_result, bucket_name="bucketlambdafunc", device_id=device_id
+        )
+        if saved_full_passage is not None:
+            # check similarity between raw_ocr_result and saved full passage
+            question_only = extract_question_and_choices(raw_ocr_result)  # API CALL 4
+            clean_question = f"{question_only}\n{saved_full_passage}"
+            final_response = answer_verbal_question(clean_question)  # API CALL 5
+            print("Using saved full passage")
+
+        else:
+            print("No matching text find")
+            clean_question = extract_text_and_question_with_choices(raw_ocr_result)  # API CALL 4
+            final_response = answer_verbal_question(clean_question)  # API CALL 5
     else:
         clean_question = extract_text_and_question_with_choices(raw_ocr_result)  # API CALL 4
         final_response = answer_quantitative_question(clean_question)  # API CALL 5
@@ -76,7 +83,7 @@ def process_complete_question(verbal_or_quant, raw_ocr_result):
 
 def get_response_from_raw_image(file_path):
     current_timestamp = datetime.utcnow().isoformat()
-    device_id = file_path.split("/")[-2]
+    device_id = file_path.split("/")[-3]
     file_name = Path(file_path).name
 
     results = {
@@ -108,7 +115,7 @@ def get_response_from_raw_image(file_path):
         logger.error(str(e))
         return results
 
-    raw_ocr_result = ocr_claude(processed_image_url)  # API CALL 1
+    raw_ocr_result = ocr_mathpix(processed_image_url)  # API CALL 1
     print(raw_ocr_result)
     if raw_ocr_result is None:
         results["status"] = "error"
@@ -130,7 +137,7 @@ def get_response_from_raw_image(file_path):
     print(verbal_or_quant)
 
     try:
-        ocr_text, response_text, answer_choice = process_complete_question(verbal_or_quant, raw_ocr_result)
+        ocr_text, response_text, answer_choice = process_complete_question(verbal_or_quant, raw_ocr_result, device_id)
 
     except Exception as e:
         results["status"] = "error"
@@ -146,5 +153,5 @@ def get_response_from_raw_image(file_path):
     return results
 
 
-file_path = "https://bucketlambdafunc.s3.eu-north-1.amazonaws.com/00000000261981f9/image_20241114_155930.jpg"
+file_path = "https://bucketlambdafunc.s3.eu-north-1.amazonaws.com/00000000261981f9/b95335b6-d085-4381-b9d2-835b2fdeda0e/image_20241120_123322_007643.jpg"
 print(get_response_from_raw_image(file_path))
