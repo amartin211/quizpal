@@ -18,9 +18,8 @@ from prompts_template.general_prompts import (
     extract_question_and_choices,
     answer_verbal_question,
     answer_quantitative_question,
-    get_ocr_status,
-    verbal_or_quantitive,
     structure_response,
+    get_ocr_status_and_question_type,
 )
 
 
@@ -58,26 +57,27 @@ def upload_image_to_s3(file_path_processed, device_id, file_name):
 
 def process_complete_question(verbal_or_quant, raw_ocr_result, device_id):
 
-    if verbal_or_quant == "verbal":
+    if verbal_or_quant == "verbal" or verbal_or_quant == "other":
         saved_full_passage = find_matching_saved_text_s3(
             raw_ocr_result, bucket_name="bucketlambdafunc", device_id=device_id
         )
         if saved_full_passage is not None:
+            print("saved text found")
             # check similarity between raw_ocr_result and saved full passage
-            question_only = extract_question_and_choices(raw_ocr_result)  # API CALL 4
-            clean_question = f"{question_only}\n{saved_full_passage}"
-            final_response = answer_verbal_question(clean_question)  # API CALL 5
+            question_only = extract_question_and_choices(raw_ocr_result)  # API CALL 3
+            clean_question = f"{saved_full_passage}\n{question_only}"
+            final_response = answer_verbal_question(clean_question)  # API CALL 4
             print("Using saved full passage")
 
         else:
             print("No matching text find")
-            clean_question = extract_text_and_question_with_choices(raw_ocr_result)  # API CALL 4
-            final_response = answer_verbal_question(clean_question)  # API CALL 5
+            clean_question = extract_text_and_question_with_choices(raw_ocr_result)  # API CALL 3
+            final_response = answer_verbal_question(clean_question)  # API CALL 4
     else:
-        clean_question = extract_text_and_question_with_choices(raw_ocr_result)  # API CALL 4
-        final_response = answer_quantitative_question(clean_question)  # API CALL 5
+        clean_question = extract_text_and_question_with_choices(raw_ocr_result)  # API CALL 3
+        final_response = answer_quantitative_question(clean_question)  # API CALL 4
 
-    answer_choice = structure_response(final_response)  # API CALL 6
+    answer_choice = structure_response(final_response)  # API CALL 5
     return clean_question, final_response, answer_choice
 
 
@@ -115,7 +115,7 @@ def get_response_from_raw_image(file_path):
         logger.error(str(e))
         return results
 
-    raw_ocr_result = ocr_mathpix(processed_image_url)  # API CALL 1
+    raw_ocr_result = ocr_claude(processed_image_url)  # API CALL 1
     print(raw_ocr_result)
     if raw_ocr_result is None:
         results["status"] = "error"
@@ -123,9 +123,14 @@ def get_response_from_raw_image(file_path):
         logger.error("An error occurred with the API while processing the image")
         return results
 
-    ocr_status = get_ocr_status(raw_ocr_result)  # API CALL 2
-    print(ocr_status)
-    if ocr_status == "false":
+    # ocr_status = get_ocr_status(raw_ocr_result)  # API CALL 2
+    status_response = get_ocr_status_and_question_type(raw_ocr_result)  # API CALL 2
+
+    ocr_status = status_response.ocr_status
+    verbal_or_quant = status_response.verbal_or_quant
+
+    print(status_response)
+    if ocr_status == False:
         results["status"] = "error"
         results["error_message"] = (
             "Unable to retrieve texts from the image or the text is not related to a problem-solving question"
@@ -133,8 +138,10 @@ def get_response_from_raw_image(file_path):
         logger.error("An error occurred while processing the image")
         return results
 
-    verbal_or_quant = verbal_or_quantitive(raw_ocr_result)  # API CALL 3
-    print(verbal_or_quant)
+    # verbal_or_quant = verbal_or_quantitive(raw_ocr_result)  # API CALL 3
+
+    if verbal_or_quant == "quantitative":
+        raw_ocr_result = ocr_mathpix(processed_image_url)
 
     try:
         ocr_text, response_text, answer_choice = process_complete_question(verbal_or_quant, raw_ocr_result, device_id)
@@ -151,7 +158,3 @@ def get_response_from_raw_image(file_path):
     results["response_text"] = response_text
     results["answer_choice"] = answer_choice
     return results
-
-
-file_path = "https://bucketlambdafunc.s3.eu-north-1.amazonaws.com/00000000261981f9/b95335b6-d085-4381-b9d2-835b2fdeda0e/image_20241120_123322_007643.jpg"
-print(get_response_from_raw_image(file_path))

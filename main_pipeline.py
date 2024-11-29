@@ -88,6 +88,20 @@ def process_long_press_images(bucket, device_id, session_id):
     return result
 
 
+def is_long_press_session(bucket, device_id, session_id):
+    """Check if this session has multiple images (indicating long press)"""
+    prefix = f"{device_id}/{session_id}/"
+    response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
+    if not response.get("Contents"):
+        return False
+
+    # Count the number of image files in the session
+    image_count = sum(1 for obj in response["Contents"] if obj["Key"].endswith(".jpg"))
+
+    # Return True if there are multiple images
+    return image_count > 1
+
+
 def lambda_handler(event, context):
 
     print("sucess")
@@ -100,27 +114,34 @@ def lambda_handler(event, context):
     # Assuming the object key format is "DEVICE_ID/unique_filename.jpg"
     parts = key.split("/")
     device_id = parts[0]
-    session_id = parts[1]
-    filename = parts[2] if len(parts) > 2 else ""
-    print("device_id : ", device_id)
-    logging.info(f"Device ID: {device_id}, Session ID: {session_id}, Filename: {filename}")
+
+    # Handle both short press (device_id/image.jpg) and long press (device_id/session_id/image.jpg) cases
+    if len(parts) == 2:  # Short press: device_id/image.jpg
+        session_id = None
+        filename = parts[1]
+        logging.info(f"Short press detected - Device ID: {device_id}, Filename: {filename}")
+    else:  # Long press: device_id/session_id/image.jpg
+        session_id = parts[1]
+        filename = parts[2]
+        logging.info(f"Long press detected - Device ID: {device_id}, Session ID: {session_id}, Filename: {filename}")
 
     print("bucket : ", bucket)
     print("key : ", key)
     print("tmp_file_path : ", tmp_file_path)
 
     try:
-        # client_id = get_client_id_from_device(device_id, connectionID_table)
-        # openai_api_key = get_openai_secret(client_id)
-
-        # Set OpenAI API key as environment variable
-        # os.environ["OPENAI_API_KEY"] = openai_api_key
-
-        # Check if it's a manifest file
-        if filename == "manifest.txt":
-            # Process all images in the session
-            result = process_long_press_images(bucket, device_id, session_id)
-            save_text_to_s3(result, bucket, device_id, session_id)
+        if session_id and is_long_press_session(bucket, device_id, session_id):
+            if filename == "manifest.json":  # Only process when manifest arrives
+                result = process_long_press_images(bucket, device_id, session_id)
+                save_text_to_s3(result, bucket, device_id, session_id)
+                connection_id = get_connection_id(device_id, connectionID_table)
+                response_data = {"message": "X"}
+                send_to_websocket(connection_id, response_data)
+                results = {"status": "success", "mode": "long_press", "result": result}
+            else:
+                # Skip processing individual images in long press mode
+                logger.info(f"Skipping individual image processing in long press session: {filename}")
+                return {"statusCode": 200, "body": json.dumps({"status": "skipped", "mode": "long_press_image"})}
         else:
             # For short press, process the single image
             tmp_file_path = os.path.join("/tmp", key)
