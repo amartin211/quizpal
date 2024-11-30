@@ -19,6 +19,42 @@ client = OpenAI()
 # - structure_answer_choice DONE
 
 
+def get_ocr_status_and_question_type(prompt, model="gpt-4o"):
+    completion = client.beta.chat.completions.parse(
+        model=model,
+        messages=[
+            {
+                "role": "system",
+                "content": """You are a specialized detector for multiple-choice questions and text classification. 
+                Your task is twofold:
+                1. Determine if the given text contains a multiple-choice question format.
+                   Output `true` if:
+                   - There is a clear question followed by labeled options (A, B, C, D, etc.).
+                   - A passage is followed by a question and labeled answer choices.
+                   - There are insertion points (■, [], {}, etc.) with labeled options.
+                   - Any format requires the reader to choose from labeled options.
+                   Otherwise, output `false`.
+                2. Classify the question type:
+                   - If the question contains a lot of text and is verbal in nature, output 'verbal'.
+                   - If the question involves calculations or numeric reasoning, output 'quantitative'.
+                   - For any other type of text, output 'other'.
+                Respond in the following JSON format:
+                {
+                    "ocr_status": true|false,
+                    "verbal_or_quant": "verbal"|"quantitative"|"other"
+                }
+                """,
+            },
+            {"role": "user", "content": prompt.strip()},
+        ],
+        response_format=OCRResponse,
+    )
+
+    ocr_result = completion.choices[0].message.parsed
+
+    return ocr_result
+
+
 def extract_text_and_question_with_choices(prompt, model="gpt-4o"):
     messages = [
         {
