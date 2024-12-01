@@ -9,7 +9,7 @@ def create_s3_event(bucket_name, object_key):
 def test_short_press():
     # Simulate a short press event
     event = create_s3_event(
-        bucket_name="bucketlambdafunc", object_key="00000000261981f9/image_20241201_104628_651404.jpg"
+        bucket_name="bucketlambdafunc", object_key="00000000261981f9/image_20241201_181822_773474.jpg"
     )
 
     context = None  # You can create a mock context if needed

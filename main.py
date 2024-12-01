@@ -1,8 +1,8 @@
 # docker commands:
 # aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 583247773415.dkr.ecr.eu-north-1.amazonaws.com
-# docker build -t my-lambda-image .
-# docker tag my-lambda-image:latest 583247773415.dkr.ecr.eu-north-1.amazonaws.com/myapp_image_repo:latest
-# docker push 583247773415.dkr.ecr.eu-north-1.amazonaws.com/myapp_image_repo:latest
+# docker build -t general_question .
+# docker tag general_question:latest 583247773415.dkr.ecr.eu-north-1.amazonaws.com/general_question:latest
+# docker push 583247773415.dkr.ecr.eu-north-1.amazonaws.com/general_question:latest
 
 from pipeline.all_exams_generate_full_response import get_response_from_raw_image
 from pipeline.long_text_processing_lambda import process_multiple_images
