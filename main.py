@@ -72,7 +72,7 @@ def process_long_press_images(bucket, device_id, session_id):
     for obj in response.get("Contents", []):
         key = obj["Key"]
         filename = key.split("/")[-1]
-        if filename != "manifest.txt":
+        if filename != "manifest.json":
             image_keys.append(key)
 
     # Download all images to /tmp
@@ -125,9 +125,9 @@ def lambda_handler(event, context):
         filename = parts[2]
         logging.info(f"Long press detected - Device ID: {device_id}, Session ID: {session_id}, Filename: {filename}")
 
-    print("bucket : ", bucket)
-    print("key : ", key)
-    print("tmp_file_path : ", tmp_file_path)
+    # print("bucket : ", bucket)
+    # print("key : ", key)
+    # print("tmp_file_path : ", tmp_file_path)
 
     try:
         if session_id and is_long_press_session(bucket, device_id, session_id):

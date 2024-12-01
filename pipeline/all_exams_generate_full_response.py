@@ -83,7 +83,11 @@ def process_complete_question(verbal_or_quant, raw_ocr_result, device_id):
 
 def get_response_from_raw_image(file_path):
     current_timestamp = datetime.utcnow().isoformat()
-    device_id = file_path.split("/")[-3]
+    s3_key = file_path.split("/tmp/")[-1]  # Remove the /tmp/ prefix
+    device_id = s3_key.split("/")[0]  # Get the first part of the S3 key
+
+    print(f"S3 key: {s3_key}")
+    print(f"Device ID: {device_id}")
     file_name = Path(file_path).name
 
     results = {

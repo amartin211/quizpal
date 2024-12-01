@@ -1,5 +1,6 @@
 envsp/
 myenv/
+all_images/
 image_folder/
 app_local.py
 cloudformation/
@@ -9,3 +10,5 @@ raw_images (copy)/
 datafolder/
 dataset/
 s3/images/
+yolo/
+*.sh
