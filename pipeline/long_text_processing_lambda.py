@@ -44,6 +44,7 @@ def ocr_claude(image_path):
 
 def process_multiple_images(image_paths):
     all_extracted_text = ""
+    valid_text_found = False
 
     # Iterate through all image paths
     for image_path in image_paths:
@@ -55,8 +56,13 @@ def process_multiple_images(image_paths):
             # Perform OCR on processed image
             extracted_text = ocr_claude(processed_image_path)
 
+            if extracted_text and extracted_text.strip():
+                valid_text_found = True
+                # Append extracted text
+                all_extracted_text += f"=== Text from {os.path.basename(image_path)} ===\n{extracted_text}\n\n"
+
             # Append extracted text
-            all_extracted_text += f"=== Text from {os.path.basename(image_path)} ===\n{extracted_text}\n\n"
+            # all_extracted_text += f"=== Text from {os.path.basename(image_path)} ===\n{extracted_text}\n\n"
         except Exception as e:
             logger.error(f"Error processing {os.path.basename(image_path)}: {str(e)}")
 
@@ -65,6 +71,9 @@ def process_multiple_images(image_paths):
 
     for path in image_paths:
         os.remove(path)
+
+    if not valid_text_found:
+        return None
 
     # Return the combined text
     return single_text
@@ -116,9 +125,11 @@ def save_text_to_s3(text, bucket, device_id, session_id):
         logger.error(f"Failed to save processed text to S3: {str(e)}")
 
 
-if __name__ == "__main__":
-    bucket = "bucketlambdafunc"
-    device_id = "00000000261981f9"
-    session_id = "b95335b6-d085-4381-b9d2-835b2fdeda0e"
-    result = process_long_press_images(bucket, device_id, session_id)
-    save_text_to_s3(result, bucket, device_id, session_id)
+# if __name__ == "__main__":
+#     bucket = "bucketlambdafunc"
+#     device_id = "00000000261981f9"
+#     session_id = "5dacf0c0-ed08-4c7b-afe0-a3da34e06046"
+#     result = process_long_press_images(bucket, device_id, session_id)
+
+#     print(result)
+#     # save_text_to_s3(result, bucket, device_id, session_id)

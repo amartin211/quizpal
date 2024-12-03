@@ -133,9 +133,13 @@ def lambda_handler(event, context):
         if session_id and is_long_press_session(bucket, device_id, session_id):
             if filename == "manifest.json":  # Only process when manifest arrives
                 result = process_long_press_images(bucket, device_id, session_id)
-                save_text_to_s3(result, bucket, device_id, session_id)
+                response_message = "X" if result is not None else "None"
+
+                if result is not None:
+                    save_text_to_s3(result, bucket, device_id, session_id)
+
                 connection_id = get_connection_id(device_id, connectionID_table)
-                response_data = {"message": "X"}
+                response_data = {"message": response_message}
                 send_to_websocket(connection_id, response_data)
                 results = {"status": "success", "mode": "long_press", "result": result}
             else:
