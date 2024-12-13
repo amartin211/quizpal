@@ -89,30 +89,6 @@ def preprocess_image(image_path):
     return processed_image_path
 
 
-def process_long_press_images(bucket, device_id, session_id):
-    prefix = f"{device_id}/{session_id}/"
-    response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
-
-    image_keys = []
-    for obj in response.get("Contents", []):
-        key = obj["Key"]
-        filename = key.split("/")[-1]
-        if filename != "manifest.txt":
-            image_keys.append(key)
-
-    # Download all images to /tmp
-    image_paths = []
-    for key in image_keys:
-        filename = key.split("/")[-1]
-        tmp_file_path = os.path.join("/tmp", filename)
-        s3.download_file(bucket, key, tmp_file_path)
-        image_paths.append(tmp_file_path)
-
-    # Process all images together
-    result = process_multiple_images(image_paths)
-    return result
-
-
 def save_text_to_s3(text, bucket, device_id, session_id):
     # Define the S3 object key
     s3_key = f"{device_id}/{session_id}/processed_text.txt"

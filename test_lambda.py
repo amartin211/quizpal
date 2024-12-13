@@ -1,5 +1,5 @@
 import json
-from main import lambda_handler
+from main_image_count import lambda_handler
 
 
 def create_s3_event(bucket_name, object_key):
@@ -20,7 +20,7 @@ def test_short_press():
 def test_long_press():
     # Simulate a long press event (manifest file upload)
     event = create_s3_event(
-        bucket_name="bucketlambdafunc", object_key="00000000261981f9/24e049d5-bf74-45eb-8fc5-7b2d8e6773e2/manifest.json"
+        bucket_name="bucketlambdafunc", object_key="00000000261981f9/35a8f39e-b401-4a3e-8758-8b9cfc75ef55/manifest.json"
     )
 
     context = None
@@ -29,5 +29,5 @@ def test_long_press():
 
 
 if __name__ == "__main__":
-    test_short_press()
-    # test_long_press()
+    # test_short_press()
+    test_long_press()

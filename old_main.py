@@ -12,7 +12,6 @@ import os
 import urllib.parse
 import boto3
 import json
-import time
 
 import logging
 
@@ -65,58 +64,22 @@ def save_text_to_s3(text, bucket, device_id, session_id):
         logger.error(f"Failed to save processed text to S3: {str(e)}")
 
 
-def check_all_images_available(bucket, device_id, session_id, expected_images):
-    """Check if all expected images are available in S3"""
+def process_long_press_images(bucket, device_id, session_id):
     prefix = f"{device_id}/{session_id}/"
     response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
 
-    # Get list of actual image files in S3
-    available_images = set()
+    image_keys = []
     for obj in response.get("Contents", []):
-        filename = obj["Key"].split("/")[-1]
-        if filename.endswith(".jpg"):
-            available_images.add(filename)
+        key = obj["Key"]
+        filename = key.split("/")[-1]
+        if filename != "manifest.json":
+            image_keys.append(key)
 
-    # Convert expected_images to set for comparison
-    expected_images_set = set(expected_images)
-
-    logger.info(f"Expected images: {expected_images_set}")
-    logger.info(f"Available images: {available_images}")
-
-    return available_images.issuperset(expected_images_set)
-
-
-def process_long_press_images(bucket, device_id, session_id, manifest_data):
-    """Process images with manifest data"""
-    expected_images = manifest_data.get("images", [])
-    image_count = manifest_data.get("image_count", 0)
-
-    # Verify image count matches
-    if len(expected_images) != image_count:
-        logger.error(f"Manifest image count mismatch. Expected: {image_count}, Found: {len(expected_images)}")
-        return None
-
-    # Check if all images are available
-    max_retries = 5
-    retry_delay = 2  # seconds
-
-    for attempt in range(max_retries):
-        if check_all_images_available(bucket, device_id, session_id, expected_images):
-            break
-        if attempt < max_retries - 1:
-            logger.info(
-                f"Not all images available yet. Attempt {attempt + 1}/{max_retries}. Waiting {retry_delay} seconds..."
-            )
-            time.sleep(retry_delay)
-    else:
-        logger.error("Timed out waiting for all images to be available")
-        return None
-
-    # Process images in order specified by manifest
+    # Download all images to /tmp
     image_paths = []
-    for image_name in expected_images:
-        key = f"{device_id}/{session_id}/{image_name}"
-        tmp_file_path = os.path.join("/tmp", image_name)
+    for key in image_keys:
+        filename = key.split("/")[-1]
+        tmp_file_path = os.path.join("/tmp", filename)
         s3.download_file(bucket, key, tmp_file_path)
         image_paths.append(tmp_file_path)
 
@@ -169,13 +132,7 @@ def lambda_handler(event, context):
     try:
         if session_id and is_long_press_session(bucket, device_id, session_id):
             if filename == "manifest.json":  # Only process when manifest arrives
-                # Download and parse manifest
-                tmp_manifest_path = os.path.join("/tmp", "manifest.json")
-                s3.download_file(bucket, key, tmp_manifest_path)
-                with open(tmp_manifest_path, "r") as f:
-                    manifest_data = json.load(f)
-
-                result = process_long_press_images(bucket, device_id, session_id, manifest_data)
+                result = process_long_press_images(bucket, device_id, session_id)
                 response_message = "X" if result is not None else "None"
 
                 if result is not None:

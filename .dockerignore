@@ -12,3 +12,6 @@ dataset/
 s3/images/
 yolo/
 *.sh
+rpi_and_websocket_scripts/
+test_image_orient.py
+test_lambda.py
